@@ -6,16 +6,24 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
+	"github.com/durianpay/fullstack-boilerplate/internal/entity"
 	"github.com/durianpay/fullstack-boilerplate/internal/openapigen"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
+	"github.com/golang-jwt/jwt/v5"
 	oapinethttpmw "github.com/oapi-codegen/nethttp-middleware"
 )
 
 type Server struct {
 	router http.Handler
+}
+
+type TokenVerifier interface {
+	VerifyToken(token string) (jwt.MapClaims, error)
 }
 
 const (
@@ -24,7 +32,7 @@ const (
 	idleTimeout  = 60
 )
 
-func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string) *Server {
+func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, verifier TokenVerifier) *Server {
 	swagger, err := openapigen.GetSwagger()
 	if err != nil {
 		log.Fatalf("failed to load swagger: %v", err)
@@ -32,12 +40,32 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string) *S
 
 	r := chi.NewRouter()
 
+	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
+		http.ServeFile(w, req, openapiYamlPath)
+	})
+	r.Get("/docs", swaggerUIHandler)
+
 	r.Route("/", func(api chi.Router) {
 		api.Use(oapinethttpmw.OapiRequestValidatorWithOptions(
 			swagger,
 			&oapinethttpmw.Options{
 				DoNotValidateServers:  true,
 				SilenceServersWarning: true,
+				Options: openapi3filter.Options{
+					AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+						authHeader := input.RequestValidationInput.Request.Header.Get("Authorization")
+						if authHeader == "" {
+							return entity.ErrorUnauthorized("missing authorization header")
+						}
+
+						tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+						if _, err := verifier.VerifyToken(tokenString); err != nil {
+							return entity.ErrorUnauthorized("invalid or expired token")
+						}
+
+						return nil
+					},
+				},
 			},
 		))
 		openapigen.HandlerFromMux(apiHandler, api)
@@ -46,6 +74,31 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string) *S
 	return &Server{
 		router: r,
 	}
+}
+
+const swaggerUIPage = `<!DOCTYPE html>
+<html>
+  <head>
+    <title>API Docs</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: "/openapi.yaml",
+          dom_id: "#swagger-ui",
+        });
+      };
+    </script>
+  </body>
+</html>`
+
+func swaggerUIHandler(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(swaggerUIPage))
 }
 
 func (s *Server) Start(addr string) {

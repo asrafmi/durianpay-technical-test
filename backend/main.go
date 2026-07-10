@@ -45,7 +45,7 @@ func main() {
 		Auth: authH,
 	}
 
-	server := srv.NewServer(apiHandler, config.OpenapiYamlLocation)
+	server := srv.NewServer(apiHandler, config.OpenapiYamlLocation, authUC)
 
 	addr := config.HttpAddress
 	log.Printf("starting server on %s", addr)

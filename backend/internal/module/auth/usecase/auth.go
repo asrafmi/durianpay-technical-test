@@ -48,3 +48,22 @@ func (a *Auth) Login(email string, password string) (string, *entity.User, error
 	}
 	return signed, user, nil
 }
+
+func (a *Auth) VerifyToken(tokenStr string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+		return a.jwtSecret, nil
+	})
+	if err != nil {
+		return nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, "invalid token")
+	}
+	if !token.Valid {
+		return nil, entity.ErrorUnauthorized("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, entity.ErrorUnauthorized("invalid token claims")
+	}
+
+	return claims, nil
+}
