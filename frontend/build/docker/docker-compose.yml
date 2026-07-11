@@ -1,0 +1,12 @@
+services:
+  frontend:
+    build:
+      context: ../../..
+      dockerfile: frontend/build/docker/Dockerfile
+      args:
+        VITE_API_BASE_URL: "${VITE_API_BASE_URL:-http://localhost:8080}"
+    image: durianpay-frontend:latest
+    container_name: durianpay-frontend
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    restart: unless-stopped

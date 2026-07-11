@@ -52,6 +52,25 @@ air
 
 This is optional; `make run` works without it.
 
+## Seed data
+
+On first run, the server creates its SQLite schema (if missing) and seeds it:
+
+| Email | Password | Role |
+|---|---|---|
+| `cs@test.com` | `password` | `cs` |
+| `operation@test.com` | `password` | `operation` |
+
+A set of sample payments (varying `completed`/`processing`/`failed` statuses and merchants) is seeded as well. Seeding only runs when the respective table is empty, so it is safe to restart the server without duplicating data.
+
+## Docker
+
+```bash
+docker compose -f build/docker/docker-compose.yml up -d --build
+```
+
+The server is available at `http://localhost:8080`. The SQLite database is persisted in a named volume (`backend-data`) so data survives container restarts. See the [Dockerfile](build/docker/Dockerfile) and [docker-compose.yml](build/docker/docker-compose.yml) for details, or use the root-level `npm run docker:backend:*` scripts documented in the [repo root README](../README.md).
+
 ## API documentation
 
 Once the server is running, the API docs are available at:
@@ -62,7 +81,11 @@ Once the server is running, the API docs are available at:
 ## API endpoints
 
 - `POST /dashboard/v1/auth/login` - authenticate with `{email, password}`, returns a JWT and user role
-- `GET /dashboard/v1/payments` - list payments, optionally filtered with `?status=<completed|processing|failed>` (requires `Authorization: Bearer <token>`)
+- `GET /dashboard/v1/payments` - list payments (requires `Authorization: Bearer <token>`), supports:
+  - `status=<completed|processing|failed>` - filter by status
+  - `search=<text>` - filter by merchant name (substring match)
+  - `page=<n>` - page number, 1-indexed (default `1`)
+  - `limit=<n>` - items per page, max `100` (default `10`)
 
 ## Makefile targets
 
