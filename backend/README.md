@@ -84,6 +84,19 @@ docker compose -f build/docker/docker-compose.production.yml up -d --build
 
 Either way, the server is available at `http://localhost:8080`. The SQLite database is persisted in a named volume so data survives container restarts. See [docker-compose.yml](build/docker/docker-compose.yml) / [docker-compose.production.yml](build/docker/docker-compose.production.yml) for details, or use the root-level `npm run docker:backend:*` / `npm run docker:production:backend:*` scripts documented in the [repo root README](../README.md).
 
+## Testing
+
+```bash
+go test ./...
+go test ./... -cover
+```
+
+**Strategy:** unit tests focus on the usecase layer, since that is where the critical business logic lives (JWT issuance/verification, credential checks, pagination normalization, filter pass-through). Usecases depend on their repositories through interfaces (`UserRepository`, `PaymentRepository`), so tests use small hand-written fakes instead of a real database or a mocking library - no test doubles beyond a plain struct implementing the interface are needed.
+
+Handlers and repositories are not unit-tested here: handlers are thin adapters with little logic of their own, and repositories are mostly SQL - testing them meaningfully would require a real database (integration tests), which is out of scope for this pass.
+
+Current coverage: `auth/usecase` ~88%, `payment/usecase` ~89%, `pkg/pagination` 100%.
+
 ## API documentation
 
 Once the server is running, the API docs are available at:
