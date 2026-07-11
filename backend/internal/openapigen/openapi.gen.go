@@ -32,11 +32,11 @@ type Error struct {
 
 // Payment defines model for Payment.
 type Payment struct {
-	Amount    *string    `json:"amount,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
 	Id        *string    `json:"id,omitempty"`
 	Merchant  *string    `json:"merchant,omitempty"`
 	Status    *string    `json:"status,omitempty"`
+	Amount    *string    `json:"amount,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 
 // User defines model for User.

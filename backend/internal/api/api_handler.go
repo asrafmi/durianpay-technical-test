@@ -4,11 +4,13 @@ import (
 	"net/http"
 
 	ah "github.com/asrafmi/durianpay-technical-test/backend/internal/module/auth/handler"
+	ph "github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/handler"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
 )
 
 type APIHandler struct {
-	Auth *ah.AuthHandler
+	Auth    *ah.AuthHandler
+	Payment *ph.PaymentHandler
 }
 
 var _ openapigen.ServerInterface = (*APIHandler)(nil)
@@ -18,6 +20,5 @@ func (h *APIHandler) PostDashboardV1AuthLogin(w http.ResponseWriter, r *http.Req
 }
 
 func (h *APIHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, body openapigen.GetDashboardV1PaymentsParams) {
-	// TODO add implementations
-	w.Write([]byte("Not implemented"))
+	h.Payment.GetDashboardV1Payments(w, r)
 }

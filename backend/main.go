@@ -10,6 +10,9 @@ import (
 	ah "github.com/asrafmi/durianpay-technical-test/backend/internal/module/auth/handler"
 	ar "github.com/asrafmi/durianpay-technical-test/backend/internal/module/auth/repository"
 	au "github.com/asrafmi/durianpay-technical-test/backend/internal/module/auth/usecase"
+	ph "github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/handler"
+	pr "github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/repository"
+	pu "github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/usecase"
 	srv "github.com/asrafmi/durianpay-technical-test/backend/internal/service/http"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -36,13 +39,17 @@ func main() {
 	}
 
 	userRepo := ar.NewUserRepo(db)
+	paymentRepo := pr.NewPaymentRepo(db)
 
 	authUC := au.NewAuthUsecase(userRepo, config.JwtSecret, JwtExpiredDuration)
+	paymentUC := pu.NewPaymentUsecase(paymentRepo)
 
 	authH := ah.NewAuthHandler(authUC)
+	paymentH := ph.NewPaymentHandler(paymentUC)
 
 	apiHandler := &api.APIHandler{
-		Auth: authH,
+		Auth:    authH,
+		Payment: paymentH,
 	}
 
 	server := srv.NewServer(apiHandler, config.OpenapiYamlLocation, authUC)
@@ -60,7 +67,16 @@ func initDB(db *sql.DB) error {
 		  email TEXT NOT NULL UNIQUE,
 		  password_hash TEXT NOT NULL,
 		  role TEXT NOT NULL
-		);`,
+		);
+		
+		CREATE TABLE IF NOT EXISTS payments (
+		  id INTEGER PRIMARY KEY AUTOINCREMENT,
+		  merchant VARCHAR(255) NOT NULL,
+		  status VARCHAR(50) NOT NULL,
+		  amount DECIMAL(10, 2) NOT NULL,
+		  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)
+		`,
 	}
 	for _, s := range stmts {
 		if _, err := db.Exec(s); err != nil {
