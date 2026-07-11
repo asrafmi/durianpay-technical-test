@@ -1,0 +1,12 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "CGO_ENABLED=1 go build -o ./tmp/mygolangapp main.go"
+bin = "./tmp/mygolangapp"
+include_ext = ["go"]
+exclude_dir = ["tmp", "bin", "vendor"]
+delay = 200
+
+[log]
+time = false

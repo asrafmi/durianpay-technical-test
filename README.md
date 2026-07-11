@@ -44,33 +44,44 @@ See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/REA
 
 ## Quick start (Docker)
 
-Each service has its own Dockerfile and Compose file under `<service>/build/docker/`. From the repo root:
+Each service has one Dockerfile with two build targets - `dev` and `production` - selected via `target:` in the respective Compose file. Compose files live under `<service>/build/docker/`:
+
+- `docker-compose.yml` - **dev**: hot-reload (`air` for the backend, Vite dev server for the frontend), source code bind-mounted from the host.
+- `docker-compose.production.yml` - **production**: compiled binary / static bundle served by nginx, no source mount.
+
+### Dev containers (hot-reload)
 
 ```bash
 npm run docker:up
 ```
 
-This builds and starts both containers:
+- Backend: `http://localhost:8080` (rebuilds automatically on `.go` file changes)
+- Frontend: `http://localhost:5173` (Vite HMR on file changes)
+
+```bash
+npm run docker:build   # build both dev images without starting
+npm run docker:down    # stop and remove both dev containers
+npm run docker:logs    # tail logs from both dev containers
+```
+
+### Production containers
+
+```bash
+npm run docker:production:up
+```
 
 - Backend: `http://localhost:8080`
 - Frontend: `http://localhost:5173`
 
-Other Docker commands:
-
 ```bash
-npm run docker:build   # build both images without starting
-npm run docker:down    # stop and remove both containers
-npm run docker:logs    # tail logs from both containers
+npm run docker:production:build
+npm run docker:production:down
+npm run docker:production:logs
 ```
 
-Backend and frontend can also be run independently:
+Backend and frontend can also be run independently in either mode, e.g. `npm run docker:backend:up` (dev) or `npm run docker:production:backend:up` (production).
 
-```bash
-npm run docker:backend:up
-npm run docker:frontend:up
-```
-
-The backend container persists its SQLite database in a named Docker volume (`backend-data`), so data survives container restarts. Delete the volume (`docker volume rm docker_backend-data`) to reset to a clean seeded state.
+The backend container persists its SQLite database in a named Docker volume, so data survives container restarts. Delete the volume (`docker volume ls` to find the name, then `docker volume rm <name>`) to reset to a clean seeded state.
 
 ## Seed data
 

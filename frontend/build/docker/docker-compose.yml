@@ -3,10 +3,12 @@ services:
     build:
       context: ../../..
       dockerfile: frontend/build/docker/Dockerfile
-    image: durianpay-frontend:latest
-    container_name: durianpay-frontend
+      target: dev
+    image: durianpay-frontend:dev
+    container_name: durianpay-frontend-dev
     ports:
-      - "${FRONTEND_PORT:-5173}:80"
-    environment:
-      API_BASE_URL: "${API_BASE_URL:-http://localhost:8080}"
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ../../../frontend:/app
+      - /app/node_modules
     restart: unless-stopped

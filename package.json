@@ -29,7 +29,21 @@
     "docker:build": "concurrently \"npm run docker:backend:build\" \"npm run docker:frontend:build\"",
     "docker:up": "npm run docker:backend:up && npm run docker:frontend:up",
     "docker:down": "concurrently \"npm run docker:backend:down\" \"npm run docker:frontend:down\"",
-    "docker:logs": "concurrently \"npm run docker:backend:logs\" \"npm run docker:frontend:logs\""
+    "docker:logs": "concurrently \"npm run docker:backend:logs\" \"npm run docker:frontend:logs\"",
+    "docker:production:backend": "docker compose -f backend/build/docker/docker-compose.production.yml",
+    "docker:production:backend:build": "npm run docker:production:backend -- build",
+    "docker:production:backend:up": "npm run docker:production:backend -- up -d",
+    "docker:production:backend:down": "npm run docker:production:backend -- down",
+    "docker:production:backend:logs": "npm run docker:production:backend -- logs -f backend",
+    "docker:production:frontend": "docker compose -f frontend/build/docker/docker-compose.production.yml",
+    "docker:production:frontend:build": "npm run docker:production:frontend -- build",
+    "docker:production:frontend:up": "npm run docker:production:frontend -- up -d",
+    "docker:production:frontend:down": "npm run docker:production:frontend -- down",
+    "docker:production:frontend:logs": "npm run docker:production:frontend -- logs -f frontend",
+    "docker:production:build": "concurrently \"npm run docker:production:backend:build\" \"npm run docker:production:frontend:build\"",
+    "docker:production:up": "npm run docker:production:backend:up && npm run docker:production:frontend:up",
+    "docker:production:down": "concurrently \"npm run docker:production:backend:down\" \"npm run docker:production:frontend:down\"",
+    "docker:production:logs": "concurrently \"npm run docker:production:backend:logs\" \"npm run docker:production:frontend:logs\""
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

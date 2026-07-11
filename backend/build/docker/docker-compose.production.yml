@@ -3,9 +3,9 @@ services:
     build:
       context: ../../..
       dockerfile: backend/build/docker/Dockerfile
-      target: dev
-    image: durianpay-backend:dev
-    container_name: durianpay-backend-dev
+      target: production
+    image: durianpay-backend:latest
+    container_name: durianpay-backend
     ports:
       - "${HTTP_PORT:-8080}:8080"
     environment:
@@ -15,10 +15,8 @@ services:
       JWT_EXPIRED: "${JWT_EXPIRED:-24h}"
       SQLITE_DB_PATH: "/data/dashboard.db"
     volumes:
-      - ../../../backend:/src/backend
-      - ../../../openapi.yaml:/src/openapi.yaml
-      - backend-dev-data:/data
+      - backend-data:/data
     restart: unless-stopped
 
 volumes:
-  backend-dev-data:
+  backend-data:

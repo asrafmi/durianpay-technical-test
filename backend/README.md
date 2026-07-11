@@ -65,11 +65,24 @@ A set of sample payments (varying `completed`/`processing`/`failed` statuses and
 
 ## Docker
 
+The [Dockerfile](build/docker/Dockerfile) has two build targets:
+
+- `dev` - runs `air` for hot-reload; source code is bind-mounted from the host.
+- `production` - compiles a static binary and runs it directly, no source mount.
+
+Dev (hot-reload):
+
 ```bash
 docker compose -f build/docker/docker-compose.yml up -d --build
 ```
 
-The server is available at `http://localhost:8080`. The SQLite database is persisted in a named volume (`backend-data`) so data survives container restarts. See the [Dockerfile](build/docker/Dockerfile) and [docker-compose.yml](build/docker/docker-compose.yml) for details, or use the root-level `npm run docker:backend:*` scripts documented in the [repo root README](../README.md).
+Production:
+
+```bash
+docker compose -f build/docker/docker-compose.production.yml up -d --build
+```
+
+Either way, the server is available at `http://localhost:8080`. The SQLite database is persisted in a named volume so data survives container restarts. See [docker-compose.yml](build/docker/docker-compose.yml) / [docker-compose.production.yml](build/docker/docker-compose.production.yml) for details, or use the root-level `npm run docker:backend:*` / `npm run docker:production:backend:*` scripts documented in the [repo root README](../README.md).
 
 ## API documentation
 
