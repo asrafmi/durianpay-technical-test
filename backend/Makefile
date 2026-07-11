@@ -7,6 +7,8 @@ GEN_PKG=internal/openapigen
 # Default target
 .DEFAULT_GOAL := help
 
+.PHONY: help dep run build tool-openapi openapi-gen gen-secret
+
 help:
 	@echo "Available targets:"
 	@echo "  make dep        	- install depedencies
