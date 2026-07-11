@@ -37,14 +37,24 @@ func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 	}, nil
 }
 
-func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request) {
-	status := r.URL.Query().Get("status")
-	if status == "" {
-		transport.WriteAppError(w, entity.ErrorBadRequest("status query parameter is required"))
-		return
+func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params openapigen.GetDashboardV1PaymentsParams) {
+	var status, merchant string
+	if params.Status != nil {
+		status = *params.Status
+	}
+	if params.Search != nil {
+		merchant = *params.Search
 	}
 
-	payments, err := p.paymentUC.GetListPayments(status)
+	var page, limit int
+	if params.Page != nil {
+		page = *params.Page
+	}
+	if params.Limit != nil {
+		limit = *params.Limit
+	}
+
+	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, merchant, page, limit)
 	if err != nil {
 		transport.WriteError(w, err)
 		return
@@ -60,7 +70,12 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		openAPIPayments[i] = converted
 	}
 
-	err = json.NewEncoder(w).Encode(openapigen.PaymentListResponse{Payments: &openAPIPayments})
+	err = json.NewEncoder(w).Encode(openapigen.PaymentListResponse{
+		Payments: &openAPIPayments,
+		Total:    &total,
+		Page:     &page,
+		Limit:    &limit,
+	})
 	if err != nil {
 		transport.WriteAppError(w, entity.ErrorInternal("internal server error"))
 		return

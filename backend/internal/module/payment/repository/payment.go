@@ -2,12 +2,17 @@ package repository
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/pagination"
 )
 
+const errDB = "db error"
+
 type PaymentRepository interface {
-	GetListPayments(status entity.PaymentStatus) ([]entity.Payment, error)
+	GetListPayments(status entity.PaymentStatus, merchant string, page, limit int) ([]entity.Payment, error)
+	CountPayments(status entity.PaymentStatus, merchant string) (int, error)
 }
 
 type PaymentRepo struct {
@@ -18,10 +23,34 @@ func NewPaymentRepo(db *sql.DB) *PaymentRepo {
 	return &PaymentRepo{db: db}
 }
 
-func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus) ([]entity.Payment, error) {
-	rows, err := r.db.Query("SELECT id, merchant, status, amount, created_at FROM payments WHERE status = ?", status)
+func whereClause(status entity.PaymentStatus, merchant string) (string, []any) {
+	var conditions []string
+	var args []any
+
+	if status != "" {
+		conditions = append(conditions, "status = ?")
+		args = append(args, status)
+	}
+	if merchant != "" {
+		conditions = append(conditions, "merchant LIKE ?")
+		args = append(args, "%"+merchant+"%")
+	}
+
+	if len(conditions) == 0 {
+		return "", args
+	}
+
+	return " WHERE " + strings.Join(conditions, " AND "), args
+}
+
+func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, merchant string, page, limit int) ([]entity.Payment, error) {
+	where, args := whereClause(status, merchant)
+	query := "SELECT id, merchant, status, amount, created_at FROM payments" + where + " LIMIT ? OFFSET ?"
+	args = append(args, limit, pagination.Offset(page, limit))
+
+	rows, err := r.db.Query(query, args...)
 	if err != nil {
-		return nil, entity.WrapError(err, entity.ErrorCodeInternal, "db error")
+		return nil, entity.WrapError(err, entity.ErrorCodeInternal, errDB)
 	}
 
 	defer rows.Close()
@@ -31,11 +60,22 @@ func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus) ([]entity.Pay
 		var p entity.Payment
 		err := rows.Scan(&p.ID, &p.Merchant, &p.Status, &p.Amount, &p.CreatedAt)
 		if err != nil {
-			return nil, entity.WrapError(err, entity.ErrorCodeInternal, "db error")
+			return nil, entity.WrapError(err, entity.ErrorCodeInternal, errDB)
 		}
 
 		payments = append(payments, p)
 	}
 
 	return payments, nil
+}
+
+func (r *PaymentRepo) CountPayments(status entity.PaymentStatus, merchant string) (int, error) {
+	where, args := whereClause(status, merchant)
+	query := "SELECT COUNT(1) FROM payments" + where
+
+	var count int
+	if err := r.db.QueryRow(query, args...).Scan(&count); err != nil {
+		return 0, entity.WrapError(err, entity.ErrorCodeInternal, errDB)
+	}
+	return count, nil
 }

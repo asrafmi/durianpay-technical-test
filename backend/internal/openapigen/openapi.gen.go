@@ -55,7 +55,10 @@ type LoginResponse = User
 
 // PaymentListResponse defines model for PaymentListResponse.
 type PaymentListResponse struct {
+	Limit    *int       `json:"limit,omitempty"`
+	Page     *int       `json:"page,omitempty"`
 	Payments *[]Payment `json:"payments,omitempty"`
+	Total    *int       `json:"total,omitempty"`
 }
 
 // UnauthorizedError defines model for UnauthorizedError.
@@ -80,6 +83,15 @@ type GetDashboardV1PaymentsParams struct {
 
 	// Id payment id
 	Id *string `form:"id,omitempty" json:"id,omitempty"`
+
+	// Search search payments by merchant name
+	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// Page page number (1-indexed)
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
 // PostDashboardV1AuthLoginJSONRequestBody defines body for PostDashboardV1AuthLogin for application/json ContentType.
@@ -184,6 +196,45 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "id"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "search", r.URL.Query(), &params.Search, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "search"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "page", r.URL.Query(), &params.Page, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "page"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
 		}
 		return
 	}
@@ -327,22 +378,23 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"pFbfb9s2EP5XiNseGkyx5LUPhYA9ZOs2dGiBYFu2h8yYGelss5NI9XhK6wX+34sjZVuyZCRonhKL9+v7",
-	"vrsjH6BwdeMsWvaQP0CjSdfISOGXd8Tyt0RfkGnYOAs5/OTqWl96FFvGUomVWhmsSj9TcuisajQzkvW5",
-	"Wl4WhGL3r+aletEQrsxntbxcqh+UxL1QS1271sqhdWpwrn1x8Y+FBIzk/dgibSEBq2uEPBaXgC82WGup",
-	"Ej/ruqnkqJcSEuBtE+yZjF3DbrdLgNA3znoMKN+5tbG/d1/kQ+Esow3IddNUptCCPP3gBf5DL+O3hCvI",
-	"4Zv0SGIaT31645FisiF7hNySVez+Q6u0LVXrkZSxK0d1yAO7BK71tkbL74znryqsIdcgscFO1BAt/G8Y",
-	"a/9Y7V16qaQjTxPpLeyOH9zdByx4CmDnrKR4iXBjdcsbR+Z/LH8mcvQEJJ2UodA2+KNlMcIyAG3rWtMW",
-	"cnhvvDd2rZxQeK8rU0ZmIYF7XbUdayVC/iqbJ1Cj93ot9d8Mo+aqPhcpQHya5hHeBCdXx1zGWbXSpsJS",
-	"Uu2zFoSlGOjKwzFfwH/gbChqRNXr+gCwU8dYxrX0Xw9yf0Cejn48PjI9H1tDIsVtLOOYZTFqkEMzjyHE",
-	"uR9WNs+yWZaN0ybQm+n8AeK4QA6lZrxkU+OUjylPok8Z1UjFRp8W8r77qq6mfDxrbv3QQxqiQtmIiWrI",
-	"FRgpTYTUqPgkmyO+wuYYkYW1NpX8M6qFXIWTB1HB8cnEFCfgsWjJ8PYP6byY8g41IUnvHn/9suf9t7//",
-	"3G9fiRRPjwA3zE2cBFltoQjDgaY3LRltr/VWvdF+c+c0lerq+q1MLJKP8zKfZbNMILgGrW4M5PByls1e",
-	"QgKN5k2oLi337un9PJV+TivZ5IE654OcQmAYubelbCbn+ZDzr7kAC7sfYkuj5x9duX3Goj2vUaO9/+So",
-	"nFajP1AxRs9jMblzjy5MLZ5ead9n2blddbBLh/feLoFX2fxxr/E6D91z2MghqvpkeKMCFPWdOkARy6Fs",
-	"/atpjROa/Yp9ya735sngpXI7XfTRJA2PhV1y+pSJY6zcSnWFqBePT/HFuQdJ3An9y2Ik9WkB+7SmPBM0",
-	"HJwPuPga4adeF8+Uv1seQYr+2rhdSIm97jCee3T77nZFut8L2VLVrY88TStX6GrjPOevs9cZ7Ba7LwEA",
-	"AP//",
+	"pFbfb9s2EP5XCG4PDaZYctuHQsAesnUbOrRAsK3bQxbMtHi22Ymkejyl8QL/78ORsi1ZMpK2T4bF4333",
+	"ffeD9yArbxvvwFGQ5YNsFCoLBBj/BY/EvxpChaYh450s5Y/eWnUZgG0JtGArsTJQ6zATfOidaBQRoAul",
+	"WFxWCGz3j6KFeNYgrMy9WFwuxPeC/V6IhbK+dXzovBicq1Bd/O1kJg3jfmwBtzKTTlmQZQouk6HagFUc",
+	"Jdwr29R81IOUmaRtE+0JjVvL3W6XSYTQeBcgsnzr18b91n3hD5V3BC4yV01Tm0ox8/xDYPoPPcRvEVay",
+	"lN/kRxHzdBry9wEwgQ3VQ6AWnSD/LzihnBZtABTGrTzaiCN3mbxWWwuO3ppAXxRYg74BJJMI1sYaGig0",
+	"Lw6yGEew5lAz2ag1DM2mrWJs0bMhsOExJToyfLfzphDVNv73pOoB5MvnY8zjRb/8ABVNydqBCJaMPb93",
+	"qqWNR/Mf6J8QPT5Bvy6ISKiN98ERG4GO8rbWKtzKUr4zIRi3Fp4Td6dqo1M+ZSbvVN12udJMp5hn0kII",
+	"UdouqoPXUthzniLFp1VaojehydURy3gnVsrUoBlqj1ohaDZQdZBHvMj/oNmwlBKrfr6KySI5UO635dPZ",
+	"j5uWe/Zja5BTcZPCOKLcjgrk0EJjCmnaDCObF8WsKMawmexNkvJBpiaVpdSK4JKMhak7Rp94nzKygNVG",
+	"nQbyrvsqrqbuBFLUhuENLogaeA5nokFfQZI0Y1FTxifVHOkV59VILLDKxAYdxYK+hsmDlMHxyUQXZzJA",
+	"1aKh7e9ceQlyCQoBuXaP/37e6/7rX3/sZz57SqdHghuiJnUCD9QYhKEo0+sWjXLXaiteq7BZeoVaXF2/",
+	"4Y4FDKlf5rNiVjAF34BTjZGlfDErZi8kDz3axOhyvb+e381zrue85vcjSudDTCcLGFvujebJ5AMdMP+c",
+	"M7H44shU0hDoB6+3XzHez+eoUSF88qins9FvqOSjd+N2cuYerxC2cPqQPi+Kc7PqYJcPX9tdJl8W88dv",
+	"jcd5rJ7DRI5exSdDGxGpiO/EgQpbDtPWf8LWMJGzX6Cfsuu9eTbYj26mgz6a5HFF2WWnC1RqY+FXogtE",
+	"PHu8iy/OrUFpJvQfi1GqTwPYwxp9xmk8+AyHARRWmz2dIJZbsZ9vIro8E3u89rmxr0G41i4BxbP5pXEa",
+	"7s+rE1eavn8NK9XWFHcba5yxrZ3cc8bAHaZfibj1iAZQdO6nkNPSNQ1dZNKq+w67KB6J5PZL2mxqg/zK",
+	"ZutGdSz8/pC+ueUQe71oAvWKO3S7DODdvm1arLthXeZ57StVb3yg8lXxqpC7293/AQAA//8=",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,
