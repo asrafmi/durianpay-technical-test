@@ -45,9 +45,7 @@ jobs:
           file: backend/build/docker/Dockerfile
           target: production
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/backend:${{ steps.vars.outputs.tag }}
-            ${{ env.REGISTRY }}/${{ github.repository }}/backend:${{ steps.vars.outputs.tag }}-${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/backend:${{ steps.vars.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -86,8 +84,6 @@ jobs:
           file: frontend/build/docker/Dockerfile
           target: production
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/frontend:${{ steps.vars.outputs.tag }}
-            ${{ env.REGISTRY }}/${{ github.repository }}/frontend:${{ steps.vars.outputs.tag }}-${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/frontend:${{ steps.vars.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
