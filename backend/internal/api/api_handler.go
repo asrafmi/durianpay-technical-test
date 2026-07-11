@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	ah "github.com/durianpay/fullstack-boilerplate/internal/module/auth/handler"
-	"github.com/durianpay/fullstack-boilerplate/internal/openapigen"
+	ah "github.com/asrafmi/durianpay-technical-test/backend/internal/module/auth/handler"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
 )
 
 type APIHandler struct {

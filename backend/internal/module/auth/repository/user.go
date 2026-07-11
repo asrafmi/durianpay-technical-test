@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/durianpay/fullstack-boilerplate/internal/entity"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 )
 
 type UserRepository interface {

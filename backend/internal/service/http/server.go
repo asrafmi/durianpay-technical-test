@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/durianpay/fullstack-boilerplate/internal/entity"
-	"github.com/durianpay/fullstack-boilerplate/internal/openapigen"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"

@@ -1,4 +1,4 @@
-module github.com/durianpay/fullstack-boilerplate
+module github.com/asrafmi/durianpay-technical-test/backend
 
 go 1.25.5
 
