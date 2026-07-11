@@ -1,3 +1,5 @@
 # macOS
 .DS_Store
 data/dashboard.db
+
+node_modules/

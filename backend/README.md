@@ -52,6 +52,38 @@ air
 
 This is optional; `make run` works without it.
 
+## Seed data
+
+On first run, the server creates its SQLite schema (if missing) and seeds it:
+
+| Email | Password | Role |
+|---|---|---|
+| `cs@test.com` | `password` | `cs` |
+| `operation@test.com` | `password` | `operation` |
+
+A set of sample payments (varying `completed`/`processing`/`failed` statuses and merchants) is seeded as well. Seeding only runs when the respective table is empty, so it is safe to restart the server without duplicating data.
+
+## Docker
+
+The [Dockerfile](build/docker/Dockerfile) has two build targets:
+
+- `dev` - runs `air` for hot-reload; source code is bind-mounted from the host.
+- `production` - compiles a static binary and runs it directly, no source mount.
+
+Dev (hot-reload):
+
+```bash
+docker compose -f build/docker/docker-compose.yml up -d --build
+```
+
+Production:
+
+```bash
+docker compose -f build/docker/docker-compose.production.yml up -d --build
+```
+
+Either way, the server is available at `http://localhost:8080`. The SQLite database is persisted in a named volume so data survives container restarts. See [docker-compose.yml](build/docker/docker-compose.yml) / [docker-compose.production.yml](build/docker/docker-compose.production.yml) for details, or use the root-level `npm run docker:backend:*` / `npm run docker:production:backend:*` scripts documented in the [repo root README](../README.md).
+
 ## API documentation
 
 Once the server is running, the API docs are available at:
@@ -62,7 +94,11 @@ Once the server is running, the API docs are available at:
 ## API endpoints
 
 - `POST /dashboard/v1/auth/login` - authenticate with `{email, password}`, returns a JWT and user role
-- `GET /dashboard/v1/payments` - list payments, optionally filtered with `?status=<completed|processing|failed>` (requires `Authorization: Bearer <token>`)
+- `GET /dashboard/v1/payments` - list payments (requires `Authorization: Bearer <token>`), supports:
+  - `status=<completed|processing|failed>` - filter by status
+  - `search=<text>` - filter by merchant name (substring match)
+  - `page=<n>` - page number, 1-indexed (default `1`)
+  - `limit=<n>` - items per page, max `100` (default `10`)
 
 ## Makefile targets
 

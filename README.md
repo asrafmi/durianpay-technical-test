@@ -1,56 +1,121 @@
-# fullstack app
+# DurianPay Payment Dashboard
 
-Explain your service in here. This is fulltsack project related Payment using golang as backend and nuxt as frontend....
+A fullstack payment monitoring dashboard: Go REST API backend, Vue 3 + TypeScript frontend.
 
-list of tools version of your machine:
+- `backend/` - Go REST API (chi router, SQLite, JWT auth, OpenAPI-generated types)
+- `frontend/` - Vue 3 + TypeScript dashboard
 
-```bash
-go version go1.25.5 darwin/arm64
-node v24.13.1
-```
+The API contract is defined in [`openapi.yaml`](openapi.yaml) at the repo root and is the source of truth for both the generated Go server types and the frontend API client.
 
-Install all related requirements:
+## Prerequisites
 
-```bash
-Add here
-```
+- Go 1.21+ (developed against 1.25)
+- Node 20+
+- CGO-enabled C toolchain (required by the SQLite driver on the backend)
+- Docker & Docker Compose (optional, for containerized setup)
 
-How to run backend server on local:
+## Quick start (local, no Docker)
 
-```bash
-CGO_ENABLED=1 go run main.go
-```
-
-How to run backend server on production build:
+From the repo root:
 
 ```bash
-Add here
+npm run install:dependencies
 ```
 
-How to run frontend on local:
+This installs backend dependencies (`oapi-codegen`, Go modules, generates OpenAPI types, generates a JWT secret) and frontend dependencies (`npm install`).
+
+Run both backend and frontend in development mode:
 
 ```bash
-Add here
+npm run start:all:dev
 ```
 
-How to run frontend on production build:
+- Backend: `http://localhost:8080`
+- Frontend: `http://localhost:5173`
+
+Or run them individually:
 
 ```bash
-Add here
+npm run start:backend:dev
+npm run start:frontend:dev
 ```
 
-To checking openapi documentations, you can visit this url after backend running.
+See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/README.md) for details on each service, including the full list of `make` targets and environment variables.
+
+## Quick start (Docker)
+
+Each service has one Dockerfile with two build targets - `dev` and `production` - selected via `target:` in the respective Compose file. Compose files live under `<service>/build/docker/`:
+
+- `docker-compose.yml` - **dev**: hot-reload (`air` for the backend, Vite dev server for the frontend), source code bind-mounted from the host.
+- `docker-compose.production.yml` - **production**: compiled binary / static bundle served by nginx, no source mount.
+
+### Dev containers (hot-reload)
 
 ```bash
-Add here
+npm run docker:up
 ```
 
-Login to frontend by visiting:
+- Backend: `http://localhost:8080` (rebuilds automatically on `.go` file changes)
+- Frontend: `http://localhost:5173` (Vite HMR on file changes)
 
 ```bash
-Add here
+npm run docker:build   # build both dev images without starting
+npm run docker:down    # stop and remove both dev containers
+npm run docker:logs    # tail logs from both dev containers
 ```
 
-evidences: Add video evidences of your service
-see backend [README.md](backend/README.md)
-see frontend [README.md](frontend/README.md)
+### Production containers
+
+```bash
+npm run docker:production:up
+```
+
+- Backend: `http://localhost:8080`
+- Frontend: `http://localhost:5173`
+
+```bash
+npm run docker:production:build
+npm run docker:production:down
+npm run docker:production:logs
+```
+
+Backend and frontend can also be run independently in either mode, e.g. `npm run docker:backend:up` (dev) or `npm run docker:production:backend:up` (production).
+
+The backend container persists its SQLite database in a named Docker volume, so data survives container restarts. Delete the volume (`docker volume ls` to find the name, then `docker volume rm <name>`) to reset to a clean seeded state.
+
+## Seed data
+
+On first run (local or Docker), the backend automatically creates its SQLite schema and seeds:
+
+- Two users (see [backend/README.md](backend/README.md) for credentials) with roles `cs` and `operation`
+- A set of sample payments across `completed`, `processing`, and `failed` statuses
+
+Seeding is idempotent - it only runs if the respective table is empty, so restarting the server does not duplicate data.
+
+## Build for production
+
+```bash
+npm run build:all
+```
+
+Builds the backend binary (`backend/bin/mygolangapp`) and the frontend static bundle (`frontend/dist`).
+
+## Testing
+
+```bash
+npm run test:backend
+npm run test:frontend
+```
+
+Testing strategy is documented in [backend/README.md](backend/README.md) and [frontend/README.md](frontend/README.md).
+
+## API documentation
+
+Once the backend is running, interactive API docs are available at:
+
+- Swagger UI: `http://localhost:8080/swagger`
+- Raw OpenAPI spec: `http://localhost:8080/openapi.yaml`
+
+## Login
+
+Use one of the seeded accounts (see [backend/README.md](backend/README.md)) on the frontend login page at `http://localhost:5173`, or authenticate directly via `POST /dashboard/v1/auth/login`.
