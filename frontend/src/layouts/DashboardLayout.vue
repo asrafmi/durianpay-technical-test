@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { computed, useTemplateRef, watch } from 'vue'
-import { LayoutDashboard, Menu, PanelLeft, Receipt, X } from '@lucide/vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
+import { LayoutDashboard, Menu, PanelLeft, Settings, X } from '@lucide/vue'
 
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
+import UserMenu from '../components/UserMenu.vue'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useTypewriter } from '../composables/useTypewriter'
 import { useSlidingIndicator } from '../composables/useSlidingIndicator'
 import { useSidebar } from '../composables/useSidebar'
 import { useAuthStore } from '../stores/auth'
-import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTLEMENTS } from '../constants/routes'
+import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTINGS } from '../constants/routes'
 import { UserRole } from '../constants/user-role'
 
 const route = useRoute()
@@ -20,13 +22,13 @@ const currentPath = computed(() => route.path)
 
 const sidebarItems = [
     { name: 'Dashboard', path: ROUTE_DASHBOARD, icon: LayoutDashboard },
-    { name: 'Settlements', path: ROUTE_SETTLEMENTS, icon: Receipt },
+    { name: 'Settings', path: ROUTE_SETTINGS, icon: Settings },
 ]
 
 const navRefs = useTemplateRef<{ $el: HTMLElement }[]>('navItems')
 const INDICATOR_HEIGHT = 20
 
-const { top: navTop, height: navHeight } = useSlidingIndicator(
+const { top: navTop, height: navHeight, update: updateNavIndicator } = useSlidingIndicator(
     currentPath,
     sidebarItems.map((item) => item.path),
     navRefs,
@@ -34,6 +36,11 @@ const { top: navTop, height: navHeight } = useSlidingIndicator(
 const indicatorTop = computed(() => navTop.value + (navHeight.value - INDICATOR_HEIGHT) / 2)
 
 watch(currentPath, closeMobile)
+
+const SIDEBAR_TRANSITION_MS = 300
+watch(isCollapsed, () => {
+    setTimeout(updateNavIndicator, SIDEBAR_TRANSITION_MS)
+})
 
 function getGreetingWord(hour: number): string {
     if (hour < 11) return 'Pagi'
@@ -53,7 +60,18 @@ const { displayText: headerText } = useTypewriter([
     'Durianpay Payments Ops Dashboard',
 ])
 
-function handleLogout() {
+const isLogoutDialogOpen = ref(false)
+
+function requestLogout() {
+    isLogoutDialogOpen.value = true
+}
+
+function cancelLogout() {
+    isLogoutDialogOpen.value = false
+}
+
+function confirmLogout() {
+    isLogoutDialogOpen.value = false
     authStore.logout()
     router.push(ROUTE_LOGIN)
 }
@@ -73,30 +91,44 @@ function handleLogout() {
             <div class="flex items-center gap-2.5 px-2 pb-6" :class="{ 'md:justify-center md:px-0': isCollapsed }">
                 <img :src="durianpayLogo" alt="Durianpay" class="h-8 w-8 shrink-0" />
                 <div class="text-base font-bold text-white" :class="{ 'md:hidden': isCollapsed }">Durianpay</div>
+
+                <button
+                    type="button"
+                    class="ml-auto hidden shrink-0 cursor-pointer rounded-lg p-1.5 text-text-divider transition-colors hover:bg-white/8 hover:text-white md:flex"
+                    :class="{ 'md:hidden': isCollapsed }"
+                    title="Collapse sidebar"
+                    @click="toggleCollapsed"
+                >
+                    <PanelLeft :size="18" />
+                </button>
             </div>
 
+            <button
+                v-if="isCollapsed"
+                type="button"
+                class="mb-6 hidden w-full cursor-pointer justify-center rounded-lg p-1.5 text-text-divider transition-colors hover:bg-white/8 hover:text-white md:flex"
+                title="Expand sidebar"
+                @click="toggleCollapsed"
+            >
+                <PanelLeft :size="18" class="rotate-180" />
+            </button>
+
             <nav class="relative flex flex-col gap-0.5">
-                <span class="absolute left-3 h-5 w-1 rounded-sm bg-primary transition-[top] duration-300 ease-out"
+                <span
+                    class="absolute left-3 h-5 w-1 rounded-sm bg-primary transition-[top] duration-300 ease-out"
+                    :class="{ 'md:hidden': isCollapsed }"
                     :style="{ top: indicatorTop + 'px' }" />
                 <router-link v-for="item in sidebarItems" :key="item.path" ref="navItems" :to="item.path"
                     class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 pl-6 text-sm font-semibold text-white transition-colors hover:bg-white/8"
-                    :class="[{ 'bg-white/8': currentPath === item.path }, { 'md:justify-center md:pl-3': isCollapsed }]"
+                    :class="[
+                        currentPath === item.path ? (isCollapsed ? 'md:bg-primary/15' : 'bg-white/8') : '',
+                        { 'md:justify-center md:pl-3': isCollapsed },
+                    ]"
                     :title="isCollapsed ? item.name : undefined">
                     <component :is="item.icon" :size="18" class="shrink-0" />
                     <span :class="{ 'md:hidden': isCollapsed }">{{ item.name }}</span>
                 </router-link>
             </nav>
-
-            <button
-                type="button"
-                class="mt-2 hidden cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5 pl-6 text-sm font-semibold text-text-divider transition-colors hover:bg-white/8 hover:text-white md:flex"
-                :class="{ 'md:justify-center md:pl-3': isCollapsed }"
-                :title="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-                @click="toggleCollapsed"
-            >
-                <PanelLeft :size="18" class="shrink-0 transition-transform" :class="{ 'rotate-180': isCollapsed }" />
-                <span :class="{ 'md:hidden': isCollapsed }">Collapse</span>
-            </button>
 
             <div class="mt-auto border-t border-border-dark px-2 pt-3">
                 <div class="mt-3 text-[13px] font-semibold text-white" :class="{ 'md:hidden': isCollapsed }">{{ userEmail }}</div>
@@ -105,7 +137,7 @@ function handleLogout() {
                 <button type="button"
                     class="mt-3 w-full cursor-pointer rounded-lg border border-border-dark bg-transparent p-2 font-sans text-[13px] text-text-divider transition-colors hover:border-text-label hover:text-white"
                     :title="isCollapsed ? 'Log out' : undefined"
-                    @click="handleLogout">
+                    @click="requestLogout">
                     <span :class="{ 'md:hidden': isCollapsed }">Log out</span>
                     <X v-if="isCollapsed" :size="16" class="mx-auto hidden md:block" />
                 </button>
@@ -138,10 +170,7 @@ function handleLogout() {
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2">
-                    <div
-                        class="flex h-9 w-9 items-center justify-center rounded-full bg-bg-dark text-xs font-bold text-white">
-                        {{ userInitials }}
-                    </div>
+                    <UserMenu :initials="userInitials" :email="userEmail" :role-label="roleLabel" @logout="requestLogout" />
                 </div>
             </header>
 
@@ -150,4 +179,14 @@ function handleLogout() {
             </main>
         </div>
     </div>
+
+    <ConfirmDialog
+        :is-open="isLogoutDialogOpen"
+        title="Log out"
+        description="Are you sure you want to log out of your account?"
+        confirm-text="Log out"
+        cancel-text="Cancel"
+        @confirm="confirmLogout"
+        @cancel="cancelLogout"
+    />
 </template>

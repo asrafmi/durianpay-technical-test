@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTLEMENTS } from '../constants/routes'
+import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTINGS } from '../constants/routes'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,10 +26,10 @@ const router = createRouter({
           meta: { title: 'Payments' },
         },
         {
-          path: ROUTE_SETTLEMENTS,
-          name: 'settlements',
+          path: ROUTE_SETTINGS,
+          name: 'settings',
           component: () => import('../components/ComingSoon.vue'),
-          meta: { title: 'Settlements' },
+          meta: { title: 'Settings' },
         },
       ],
     },
