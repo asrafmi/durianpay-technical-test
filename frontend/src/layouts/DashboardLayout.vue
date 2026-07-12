@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, nextTick, ref, watch, useTemplateRef } from 'vue'
 
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import { useTypewriter } from '../composables/useTypewriter'
+import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
 const currentPath = computed(() => route.path)
 
@@ -36,14 +39,19 @@ function getGreetingWord(hour: number): string {
 
 const greetingWord = getGreetingWord(new Date().getHours())
 
-const userName = 'Ops Team'
-const userEmail = 'ops@durianpay.id'
-const roleLabel = 'Operations'
+const userEmail = computed(() => authStore.user?.email ?? '')
+const roleLabel = computed(() => (authStore.user?.role === 'operation' ? 'Operations' : 'CS Agent'))
+const userInitials = computed(() => (authStore.user?.role === 'operation' ? 'OP' : 'CS'))
 
 const { displayText: headerText } = useTypewriter([
-    `Selamat ${greetingWord}, ${userName}`,
+    `Selamat ${greetingWord}, ${userEmail.value}`,
     'Durianpay Payments Ops Dashboard',
 ])
+
+function handleLogout() {
+    authStore.logout()
+    router.push('/login')
+}
 </script>
 
 <template>
@@ -75,11 +83,13 @@ const { displayText: headerText } = useTypewriter([
                 <div class="mt-3 text-[13px] font-semibold text-white">{{ userEmail }}</div>
                 <div class="mt-0.5 text-xs text-[#9A9AA6]">{{ roleLabel }}</div>
     
-                <router-link to="/login">
-                    <button type="button" class="mt-3 w-full cursor-pointer rounded-lg border border-[#26272F] bg-transparent p-2 font-sans text-[13px] text-[#C7C7D1] transition-colors hover:border-[#3A3B45] hover:text-white">
-                      Log out
-                    </button>
-                </router-link>
+                <button
+                    type="button"
+                    class="mt-3 w-full cursor-pointer rounded-lg border border-[#26272F] bg-transparent p-2 font-sans text-[13px] text-[#C7C7D1] transition-colors hover:border-[#3A3B45] hover:text-white"
+                    @click="handleLogout"
+                >
+                    Log out
+                </button>
             </div>
         </aside>
     
@@ -103,7 +113,7 @@ const { displayText: headerText } = useTypewriter([
                             </svg>
                           </button>
                     <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#14151C] text-xs font-bold text-white">
-                        OP
+                        {{ userInitials }}
                     </div>
                 </div>
             </header>
