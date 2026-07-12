@@ -12,11 +12,17 @@ export function usePaymentFilters(pageSize = 10) {
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS)
   const status = ref<StatusFilter>(StatusFilter.ALL)
   const sort = ref<string>('-created_at')
+  const dateFrom = ref<string>('')
+  const dateTo = ref<string>('')
   const currentPage = ref<number>(1)
 
   const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize)))
 
   watch(searchQuery, () => {
+    currentPage.value = 1
+  })
+
+  watch([dateFrom, dateTo], () => {
     currentPage.value = 1
   })
 
@@ -27,6 +33,8 @@ export function usePaymentFilters(pageSize = 10) {
       limit: pageSize,
       status: status.value,
       sort: sort.value,
+      date_from: dateFrom.value,
+      date_to: dateTo.value,
     })
     paymentStore.fetchPaymentSummary()
   })
@@ -57,6 +65,8 @@ export function usePaymentFilters(pageSize = 10) {
     searchQuery,
     status,
     sort,
+    dateFrom,
+    dateTo,
     currentPage,
     totalPages,
     handleStatusChange,

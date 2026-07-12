@@ -9,6 +9,7 @@ import PaymentDetailPanel from '../components/PaymentDetailPanel.vue'
 import TextInput from '../components/TextInput.vue'
 import SummaryCard from '../components/SummaryCard.vue'
 import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
+import DateRangeFilter from '../components/DateRangeFilter.vue'
 
 import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
 import { StatusFilter } from '../constants/payment-status'
@@ -25,6 +26,8 @@ const {
     searchQuery,
     status,
     sort,
+    dateFrom,
+    dateTo,
     currentPage,
     handleStatusChange,
     handleSortToggle,
@@ -127,6 +130,8 @@ function handleClosePanel() {
                     {{ item.label }}
                 </button>
             </div>
+
+            <DateRangeFilter v-model:date-from="dateFrom" v-model:date-to="dateTo" />
         </div>
 
         <PaymentTableSkeleton v-if="paymentStore.isLoadingPaymentList" />

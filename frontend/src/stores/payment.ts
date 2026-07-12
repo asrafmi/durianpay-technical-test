@@ -31,6 +31,8 @@ interface GetDashboardV1PaymentsParams {
   search?: string
   status?: string
   sort?: string
+  date_from?: string
+  date_to?: string
   page?: number
   limit?: number
 }
@@ -48,11 +50,13 @@ export const usePaymentStore = defineStore('payment', () => {
     search,
     status,
     sort,
+    date_from,
+    date_to,
     page = 1,
     limit = 10,
   }: GetDashboardV1PaymentsParams) => {
     isLoadingPaymentList.value = true
-    const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, status, sort, page, limit })
+    const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, status, sort, date_from, date_to, page, limit })
     const [err, data] = await awaitToError(api.get<PaymentListResponse>('/dashboard/v1/payments', {
       params,
     }))

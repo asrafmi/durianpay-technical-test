@@ -19,11 +19,16 @@ defineEmits < {
     close: []
 } > ()
 
+// Dates are displayed in Asia/Jakarta (WIB) to match how the backend
+// interprets date_from/date_to filters.
+const BUSINESS_TIMEZONE = 'Asia/Jakarta'
+
 function formatDate(date: string): string {
     return new Date(date).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone: BUSINESS_TIMEZONE,
     })
 }
 
@@ -31,6 +36,7 @@ function formatTime(date: string): string {
     return new Date(date).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: BUSINESS_TIMEZONE,
     })
 }
 </script>

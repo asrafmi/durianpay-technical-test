@@ -32,6 +32,8 @@ describe('usePaymentFilters', () => {
     expect(filters.searchQuery.value).toBe('')
     expect(filters.status.value).toBe(StatusFilter.ALL)
     expect(filters.sort.value).toBe('-created_at')
+    expect(filters.dateFrom.value).toBe('')
+    expect(filters.dateTo.value).toBe('')
     expect(filters.currentPage.value).toBe(1)
   })
 
@@ -93,6 +95,37 @@ describe('usePaymentFilters', () => {
     const { filters } = mountFilters()
     filters.currentPage.value = 5
     filters.handleSortToggle()
+    expect(filters.currentPage.value).toBe(1)
+  })
+
+  it('refetches payments when dateFrom or dateTo changes', async () => {
+    const { filters } = mountFilters()
+    const store = usePaymentStore()
+    await nextTick()
+    expect(store.fetchPayments).toHaveBeenCalledTimes(1)
+
+    filters.dateFrom.value = '2026-01-01'
+    await nextTick()
+    expect(store.fetchPayments).toHaveBeenCalledTimes(2)
+    expect(store.fetchPayments).toHaveBeenLastCalledWith(
+      expect.objectContaining({ date_from: '2026-01-01', date_to: '', page: 1 }),
+    )
+
+    filters.dateTo.value = '2026-01-31'
+    await nextTick()
+    expect(store.fetchPayments).toHaveBeenCalledTimes(3)
+    expect(store.fetchPayments).toHaveBeenLastCalledWith(
+      expect.objectContaining({ date_from: '2026-01-01', date_to: '2026-01-31' }),
+    )
+  })
+
+  it('resets currentPage to 1 when the date range changes', async () => {
+    const { filters } = mountFilters()
+    filters.currentPage.value = 4
+
+    filters.dateFrom.value = '2026-01-01'
+    await nextTick()
+
     expect(filters.currentPage.value).toBe(1)
   })
 

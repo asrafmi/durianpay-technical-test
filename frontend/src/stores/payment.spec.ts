@@ -51,11 +51,23 @@ describe('usePaymentStore', () => {
       mockedGet.mockResolvedValueOnce({ data: { payments: [], total: 0, page: 1, limit: 10 } })
 
       const store = usePaymentStore()
-      await store.fetchPayments({ search: '', status: '', page: 1, limit: 10 })
+      await store.fetchPayments({ search: '', status: '', date_from: '', date_to: '', page: 1, limit: 10 })
 
       expect(mockedGet).toHaveBeenCalledWith(
         '/dashboard/v1/payments',
         { params: { page: 1, limit: 10 } },
+      )
+    })
+
+    it('passes date_from and date_to through to the API params', async () => {
+      mockedGet.mockResolvedValueOnce({ data: { payments: [], total: 0, page: 1, limit: 10 } })
+
+      const store = usePaymentStore()
+      await store.fetchPayments({ date_from: '2026-01-01', date_to: '2026-01-31', page: 1, limit: 10 })
+
+      expect(mockedGet).toHaveBeenCalledWith(
+        '/dashboard/v1/payments',
+        { params: { date_from: '2026-01-01', date_to: '2026-01-31', page: 1, limit: 10 } },
       )
     })
 

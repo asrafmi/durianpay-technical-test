@@ -12,6 +12,17 @@ import (
 
 const errDB = "db error"
 
+// created_at is stored in UTC, so date boundaries must be converted to this timezone before being
+// compared, otherwise a date picked in local time can silently shift by a
+// day at query time.
+var businessTimezone = func() *time.Location {
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return time.FixedZone("WIB", 7*60*60)
+	}
+	return loc
+}()
+
 type PaymentRepository interface {
 	GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error)
 	CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error)
@@ -39,12 +50,14 @@ func whereClause(status entity.PaymentStatus, search string, dateFrom, dateTo *t
 		args = append(args, "%"+search+"%", "%"+search+"%")
 	}
 	if dateFrom != nil {
+		startOfDay := time.Date(dateFrom.Year(), dateFrom.Month(), dateFrom.Day(), 0, 0, 0, 0, businessTimezone)
 		conditions = append(conditions, "created_at >= ?")
-		args = append(args, dateFrom.Format("2006-01-02 00:00:00"))
+		args = append(args, startOfDay.UTC().Format("2006-01-02 15:04:05"))
 	}
 	if dateTo != nil {
+		startOfNextDay := time.Date(dateTo.Year(), dateTo.Month(), dateTo.Day(), 0, 0, 0, 0, businessTimezone).AddDate(0, 0, 1)
 		conditions = append(conditions, "created_at < ?")
-		args = append(args, dateTo.AddDate(0, 0, 1).Format("2006-01-02 00:00:00"))
+		args = append(args, startOfNextDay.UTC().Format("2006-01-02 15:04:05"))
 	}
 
 	if len(conditions) == 0 {

@@ -258,3 +258,63 @@ func TestPaymentRepo_CountPayments_DateRange(t *testing.T) {
 		t.Errorf("count = %d, want 1", count)
 	}
 }
+
+// Regression test for a WIB/UTC boundary bug: a payment created late in the
+// evening UTC (18:49) is already past midnight in WIB (UTC+7), so it falls
+// on the *next* calendar day when displayed in the frontend (which renders
+// dates in the browser's local timezone). date_from/date_to must be
+// interpreted in the same business timezone (Asia/Jakarta) the frontend
+// uses, otherwise a date the user picks won't match what they see in the UI.
+func TestPaymentRepo_GetListPayments_DateFilterUsesBusinessTimezoneNotUTC(t *testing.T) {
+	db := newTestDB(t)
+	// 2026-07-12T18:49:57Z is 2026-07-13T01:49:57+07:00 (WIB) - i.e. it is
+	// "13 July" from the business's/user's point of view, even though its
+	// UTC calendar date is still "12 July".
+	_, err := db.Exec(
+		`INSERT INTO payments (merchant, status, amount, created_at) VALUES (?, ?, ?, ?)`,
+		"Kedai Kopi Senja", "processing", "600.00", "2026-07-12 18:49:57",
+	)
+	if err != nil {
+		t.Fatalf("failed to seed payment: %v", err)
+	}
+	repo := NewPaymentRepo(db)
+
+	dateFrom := date("2026-07-13")
+	dateTo := date("2026-07-13")
+	payments, err := repo.GetListPayments("", "", &dateFrom, &dateTo, 1, 10, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(payments) != 1 {
+		t.Fatalf("got %d payments, want 1 (the 18:49:57 UTC row, which is 13 July in WIB)", len(payments))
+	}
+	if payments[0].Merchant != "Kedai Kopi Senja" {
+		t.Errorf("merchant = %q, want %q", payments[0].Merchant, "Kedai Kopi Senja")
+	}
+}
+
+// Companion test: the same row must NOT match date_from=date_to=2026-07-12,
+// since in WIB it belongs to the 13th, not the 12th.
+func TestPaymentRepo_GetListPayments_DateFilterExcludesPreviousUTCDayInBusinessTimezone(t *testing.T) {
+	db := newTestDB(t)
+	_, err := db.Exec(
+		`INSERT INTO payments (merchant, status, amount, created_at) VALUES (?, ?, ?, ?)`,
+		"Kedai Kopi Senja", "processing", "600.00", "2026-07-12 18:49:57",
+	)
+	if err != nil {
+		t.Fatalf("failed to seed payment: %v", err)
+	}
+	repo := NewPaymentRepo(db)
+
+	dateFrom := date("2026-07-12")
+	dateTo := date("2026-07-12")
+	payments, err := repo.GetListPayments("", "", &dateFrom, &dateTo, 1, 10, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(payments) != 0 {
+		t.Fatalf("got %d payments, want 0 (the 18:49:57 UTC row is 13 July in WIB, not 12 July)", len(payments))
+	}
+}
