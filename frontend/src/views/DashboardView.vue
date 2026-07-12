@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import DashboardLayout from '../layouts/DashboardLayout.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import { generatePayments, formatCurrency, formatDate, STATUS_META } from '../data/payments'
 
@@ -24,8 +23,7 @@ const totalPages = Math.max(1, Math.ceil(total / pageSize))
 </script>
 
 <template>
-  <DashboardLayout>
-    <div class="flex flex-col gap-5.5">
+  <div class="flex flex-col gap-5.5">
       <div>
         <Breadcrumb :items="breadcrumbItems" />
         <div class="mt-2 text-2xl font-bold tracking-tight">Payments</div>
@@ -179,6 +177,5 @@ const totalPages = Math.max(1, Math.ceil(total / pageSize))
           </div>
         </div>
       </div>
-    </div>
-  </DashboardLayout>
+  </div>
 </template>

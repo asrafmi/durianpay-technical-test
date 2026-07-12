@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch, useTemplateRef } from 'vue'
 
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import { useTypewriter } from '../composables/useTypewriter'
@@ -8,12 +8,24 @@ import { useTypewriter } from '../composables/useTypewriter'
 const route = useRoute()
 
 const currentPath = computed(() => route.path)
-console.log('Current Path:', currentPath.value) // Log the current path to the console
 
 const sidebarItems = [
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Settlements', path: '/settlements' },
 ]
+
+const navRefs = useTemplateRef<{ $el: HTMLElement }[]>('navItems')
+const indicatorTop = ref(0)
+
+const INDICATOR_HEIGHT = 20
+
+function updateIndicator() {
+    const activeIndex = sidebarItems.findIndex((item) => item.path === currentPath.value)
+    const el = navRefs.value?.[activeIndex]?.$el
+    if (el) indicatorTop.value = el.offsetTop + (el.offsetHeight - INDICATOR_HEIGHT) / 2
+}
+
+watch(currentPath, () => nextTick(updateIndicator), { immediate: true, flush: 'post' })
 
 function getGreetingWord(hour: number): string {
     if (hour < 11) return 'Pagi'
@@ -42,9 +54,19 @@ const { displayText: headerText } = useTypewriter([
                 <div class="text-base font-bold text-white">Durianpay</div>
             </div>
     
-            <nav class="flex flex-col gap-0.5">
-                <router-link v-for="item in sidebarItems" :key="item.path" :to="item.path" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/8" :class="{ 'bg-white/8': currentPath === item.path }">
-                    <span :class="['h-5 w-1 rounded-sm', currentPath === item.path ? 'bg-[#E31C4D]' : 'bg-transparent']" />
+            <nav class="relative flex flex-col gap-0.5">
+                <span
+                    class="absolute left-3 h-5 w-1 rounded-sm bg-[#E31C4D] transition-[top] duration-300 ease-out"
+                    :style="{ top: indicatorTop + 'px' }"
+                />
+                <router-link
+                    v-for="item in sidebarItems"
+                    :key="item.path"
+                    ref="navItems"
+                    :to="item.path"
+                    class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 pl-6 text-sm font-semibold text-white transition-colors hover:bg-white/8"
+                    :class="{ 'bg-white/8': currentPath === item.path }"
+                >
                     <span>{{ item.name }}</span>
                 </router-link>
             </nav>
@@ -87,7 +109,7 @@ const { displayText: headerText } = useTypewriter([
             </header>
     
             <main class="flex-1 overflow-y-auto px-10 py-8">
-                <slot />
+                <router-view />
             </main>
         </div>
     </div>

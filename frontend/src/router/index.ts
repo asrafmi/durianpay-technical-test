@@ -13,16 +13,22 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
-      meta: { title: 'Payments' },
-    },
-    {
-      path: '/settlements',
-      name: 'settlements',
-      component: () => import('../components/ComingSoon.vue'),
-      meta: { title: 'Settlements' },
+      path: '/',
+      component: () => import('../layouts/DashboardLayout.vue'),
+      children: [
+        {
+          path: '/dashboard',
+          name: 'dashboard',
+          component: () => import('../views/DashboardView.vue'),
+          meta: { title: 'Payments' },
+        },
+        {
+          path: '/settlements',
+          name: 'settlements',
+          component: () => import('../components/ComingSoon.vue'),
+          meta: { title: 'Settlements' },
+        },
+      ],
     },
   ],
 })
