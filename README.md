@@ -19,10 +19,18 @@ The API contract is defined in [`openapi.yaml`](openapi.yaml) at the repo root a
 From the repo root:
 
 ```bash
+npm i
+```
+This install root dependencies like concurrently for running both backend and frontend in parallel.
+
+Then run:
+```
 npm run install:dependencies
 ```
 
 This installs backend dependencies (`oapi-codegen`, Go modules, generates OpenAPI types, generates a JWT secret) and frontend dependencies (`npm install`).
+
+> **Note:** `oapi-codegen` is installed via `go install`, which places the binary in `$(go env GOPATH)/bin` (usually `~/go/bin`). If you get `oapi-codegen: command not found`, add that directory to your `PATH` (e.g. in `~/.zshrc` or `~/.bashrc`): `export PATH=$PATH:$(go env GOPATH)/bin`, then open a new terminal and re-run the command.
 
 Run both backend and frontend in development mode:
 
