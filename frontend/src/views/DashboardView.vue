@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Breadcrumb from '../components/Breadcrumb.vue'
 import { formatCurrency, formatDate, STATUS_META } from '../data/payments'
-import { PaymentStatus } from '../constants/payment-status'
+import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore } from '../stores/payment.ts'
 import { computed, ref, watchEffect } from 'vue'
@@ -10,7 +10,7 @@ const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payme
 
 const pageSize = 10
 const searchQuery = ref<string>('')
-const status = ref<string>(PaymentStatus.ALL)
+const status = ref<StatusFilter>(StatusFilter.ALL)
 const currentPage = ref<number>(1)
 const paymentStore = usePaymentStore()
 
@@ -36,11 +36,11 @@ const rows = computed(() => payments.value.map((p) => ({
 })))
 const pct = (n: number) => (total.value ? Math.round((n / total.value) * 100) : 0)
 
-const completed = computed(() => payments.value.filter((p) => p.status === PaymentStatus.COMPLETED).length)
-const processing = computed(() => payments.value.filter((p) => p.status === PaymentStatus.PROCESSING).length)
-const failed = computed(() => payments.value.filter((p) => p.status === PaymentStatus.FAILED).length)
+const completed = computed(() => payments.value.filter((p) => p.status === StatusFilter.COMPLETED).length)
+const processing = computed(() => payments.value.filter((p) => p.status === StatusFilter.PROCESSING).length)
+const failed = computed(() => payments.value.filter((p) => p.status === StatusFilter.FAILED).length)
 
-const handleStatusChange = (newStatus: PaymentStatus) => {
+const handleStatusChange = (newStatus: StatusFilter) => {
     status.value = newStatus
     currentPage.value = 1
 }
@@ -94,20 +94,20 @@ const handleStatusChange = (newStatus: PaymentStatus) => {
                 class="min-w-[220px] flex-1 rounded-[9px] border border-[#E5E5EA] bg-white px-3.5 py-2.5 font-sans text-sm text-[#14151C] placeholder-[#ACACB4] outline-none" />
 
             <div class="flex gap-0.5 rounded-[9px] bg-[#EFEFF2] p-[3px]">
-                <button @click="handleStatusChange(PaymentStatus.ALL)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.ALL ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
+                <button @click="handleStatusChange(StatusFilter.ALL)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.ALL ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     All
                 </button>
-                <button @click="handleStatusChange(PaymentStatus.COMPLETED)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.COMPLETED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
+                <button @click="handleStatusChange(StatusFilter.COMPLETED)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.COMPLETED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     Completed
                 </button>
-                <button @click="handleStatusChange(PaymentStatus.PROCESSING)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.PROCESSING ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
+                <button @click="handleStatusChange(StatusFilter.PROCESSING)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.PROCESSING ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     Processing
                 </button>
-                <button @click="handleStatusChange(PaymentStatus.FAILED)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.FAILED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
+                <button @click="handleStatusChange(StatusFilter.FAILED)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.FAILED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     Failed
                 </button>
             </div>
