@@ -14,6 +14,9 @@ services:
       JWT_SECRET: "${JWT_SECRET:-dev-secret-replace-me}"
       JWT_EXPIRED: "${JWT_EXPIRED:-24h}"
       SQLITE_DB_PATH: "/data/dashboard.db"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-*}"
+      ALLOWED_METHODS: "${ALLOWED_METHODS:-GET,POST,PUT,DELETE,OPTIONS}"
+      ALLOWED_HEADERS: "${ALLOWED_HEADERS:-Origin, Content-Type, Accept, Authorization}"
     volumes:
       - backend-data:/data
     restart: unless-stopped

@@ -13,6 +13,9 @@ var (
 	HttpAddress         = getEnv("HTTP_ADDR", ":8080")
 	OpenapiYamlLocation = getEnv("OPENAPIYAML_LOCATION", "../openapi.yaml")
 	SqliteDBPath        = getEnv("SQLITE_DB_PATH", "dashboard.db")
+	AllowedOrigins      = getEnv("ALLOWED_ORIGINS", "*")
+	AllowedMethods      = getEnv("ALLOWED_METHODS", "GET,POST,PUT,DELETE,OPTIONS")
+	AllowedHeaders      = getEnv("ALLOWED_HEADERS", "Origin, Content-Type, Accept, Authorization")
 )
 
 func getEnv(key, fallback string) string {
