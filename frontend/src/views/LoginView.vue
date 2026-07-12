@@ -44,7 +44,7 @@ async function handleSubmit() {
                 <div class="text-xl font-bold tracking-tight text-white">Durianpay</div>
             </div>
 
-            <div>
+            <div class="flex flex-col items-center justify-center">
                 <div class="relative mb-2 h-[260px] w-[260px]">
                     <LottiePlayer :animation-data="loginAnimation" class="h-[260px] w-[260px]" />
                     <div
@@ -61,10 +61,10 @@ async function handleSubmit() {
                         class="animate-float-d absolute -right-[22px] bottom-2 h-4 w-4 rotate-45 border-[1.5px] border-[#5A5B66]">
                     </div>
                 </div>
-                <div class="max-w-[420px] text-4xl leading-tight font-bold tracking-tight text-white">
+                <div class="mt-4 text-4xl leading-tight font-bold tracking-tight text-white text-center">
                     Payments Ops Dashboard
                 </div>
-                <div class="mt-4 max-w-[400px] text-base leading-relaxed text-[#9A9AA6]">
+                <div class="mt-4 text-base leading-relaxed text-[#9A9AA6] text-center">
                     Monitor incoming payments, track settlement status, and act on exceptions in real
                     time.
                 </div>
