@@ -7,6 +7,7 @@ import LottiePlayer from '../components/LottiePlayer.vue'
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import loginAnimation from '../assets/animation/login-animation.json'
 import awaitToError from '../lib/await-to-error.ts'
+import { ROUTE_DASHBOARD } from '../constants/routes'
 
 const router = useRouter()
 const route = useRoute()
@@ -28,7 +29,7 @@ async function handleSubmit() {
         isSigningIn.value = false
     } else {
         isSigningIn.value = false
-        const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
+        const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ROUTE_DASHBOARD
         router.push(redirect)
     }
 }

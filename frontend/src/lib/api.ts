@@ -1,6 +1,6 @@
 import axios from 'axios'
-
-const AUTH_STORAGE_KEY = 'durianpay_auth'
+import { AUTH_STORAGE_KEY } from '../constants/storage'
+import { ROUTE_LOGIN } from '../constants/routes'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -20,12 +20,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem(AUTH_STORAGE_KEY)
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
+      if (window.location.pathname !== ROUTE_LOGIN) {
+        window.location.href = ROUTE_LOGIN
       }
     }
     return Promise.reject(error)
   },
 )
-
-export { AUTH_STORAGE_KEY }

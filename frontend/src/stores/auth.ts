@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { api, AUTH_STORAGE_KEY } from '../lib/api'
+import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
+import { AUTH_STORAGE_KEY } from '../constants/storage'
+import type { UserRole } from '../constants/user-role'
 
 interface AuthUser {
   email: string
-  role: string
+  role: UserRole
 }
 
 interface StoredAuth {
@@ -15,7 +17,7 @@ interface StoredAuth {
 
 interface LoginResponse {
   email: string
-  role: string
+  role: UserRole
   token: string
 }
 

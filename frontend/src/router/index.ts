@@ -1,15 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTLEMENTS } from '../constants/routes'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      redirect: '/login',
+      redirect: ROUTE_LOGIN,
     },
     {
-      path: '/login',
+      path: ROUTE_LOGIN,
       name: 'login',
       component: () => import('../views/LoginView.vue'),
     },
@@ -19,13 +20,13 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         {
-          path: '/dashboard',
+          path: ROUTE_DASHBOARD,
           name: 'dashboard',
           component: () => import('../views/DashboardView.vue'),
           meta: { title: 'Payments' },
         },
         {
-          path: '/settlements',
+          path: ROUTE_SETTLEMENTS,
           name: 'settlements',
           component: () => import('../components/ComingSoon.vue'),
           meta: { title: 'Settlements' },
@@ -44,11 +45,11 @@ router.beforeEach((to) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return { path: '/login', query: { redirect: to.fullPath } }
+    return { path: ROUTE_LOGIN, query: { redirect: to.fullPath } }
   }
 
   if (to.name === 'login' && authStore.isAuthenticated) {
-    return { path: '/dashboard' }
+    return { path: ROUTE_DASHBOARD }
   }
 })
 

@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import Breadcrumb from '../components/Breadcrumb.vue'
 import { generatePayments, formatCurrency, formatDate, STATUS_META } from '../data/payments'
+import { PaymentStatus } from '../constants/payment-status'
+import { ROUTE_DASHBOARD } from '../constants/routes'
 
-const breadcrumbItems = [{ label: 'Home', to: '/dashboard' }, { label: 'Payments' }]
+const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
 
 const pageSize = 8
 const payments = generatePayments()
 const total = payments.length
-const completed = payments.filter((p) => p.status === 'completed').length
-const processing = payments.filter((p) => p.status === 'processing').length
-const failed = payments.filter((p) => p.status === 'failed').length
+const completed = payments.filter((p) => p.status === PaymentStatus.COMPLETED).length
+const processing = payments.filter((p) => p.status === PaymentStatus.PROCESSING).length
+const failed = payments.filter((p) => p.status === PaymentStatus.FAILED).length
 const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0)
 
 const rows = payments.slice(0, pageSize).map((p) => ({
   ...p,
   meta: STATUS_META[p.status],
-  canRetry: p.status === 'failed',
-  canApprove: p.status === 'processing',
+  canRetry: p.status === PaymentStatus.FAILED,
+  canApprove: p.status === PaymentStatus.PROCESSING,
 }))
 
 const totalPages = Math.max(1, Math.ceil(total / pageSize))

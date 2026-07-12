@@ -1,4 +1,4 @@
-export type PaymentStatus = 'completed' | 'processing' | 'failed'
+import { PaymentStatus } from '../constants/payment-status'
 
 export interface Payment {
   id: string
@@ -44,9 +44,9 @@ export function generatePayments(): Payment[] {
   const nFailed = total - nCompleted - nProcessing
 
   const statusPool: PaymentStatus[] = [
-    ...Array(nCompleted).fill('completed'),
-    ...Array(nProcessing).fill('processing'),
-    ...Array(nFailed).fill('failed'),
+    ...new Array(nCompleted).fill(PaymentStatus.COMPLETED),
+    ...new Array(nProcessing).fill(PaymentStatus.PROCESSING),
+    ...new Array(nFailed).fill(PaymentStatus.FAILED),
   ]
   for (let i = statusPool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
@@ -75,9 +75,9 @@ export function generatePayments(): Payment[] {
 }
 
 export const STATUS_META: Record<PaymentStatus, { label: string; color: string; bg: string }> = {
-  completed: { label: 'Completed', color: '#1A9E5C', bg: '#E7F7EF' },
-  processing: { label: 'Processing', color: '#2563EB', bg: '#EAF1FE' },
-  failed: { label: 'Failed', color: '#E31C4D', bg: '#FDE8ED' },
+  [PaymentStatus.COMPLETED]: { label: 'Completed', color: '#1A9E5C', bg: '#E7F7EF' },
+  [PaymentStatus.PROCESSING]: { label: 'Processing', color: '#2563EB', bg: '#EAF1FE' },
+  [PaymentStatus.FAILED]: { label: 'Failed', color: '#E31C4D', bg: '#FDE8ED' },
 }
 
 export function formatCurrency(n: number): string {

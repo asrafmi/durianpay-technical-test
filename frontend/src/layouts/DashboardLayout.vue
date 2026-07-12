@@ -5,6 +5,8 @@ import { computed, nextTick, ref, watch, useTemplateRef } from 'vue'
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import { useTypewriter } from '../composables/useTypewriter'
 import { useAuthStore } from '../stores/auth'
+import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTLEMENTS } from '../constants/routes'
+import { UserRole } from '../constants/user-role'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,8 +15,8 @@ const authStore = useAuthStore()
 const currentPath = computed(() => route.path)
 
 const sidebarItems = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Settlements', path: '/settlements' },
+    { name: 'Dashboard', path: ROUTE_DASHBOARD },
+    { name: 'Settlements', path: ROUTE_SETTLEMENTS },
 ]
 
 const navRefs = useTemplateRef<{ $el: HTMLElement }[]>('navItems')
@@ -40,8 +42,8 @@ function getGreetingWord(hour: number): string {
 const greetingWord = getGreetingWord(new Date().getHours())
 
 const userEmail = computed(() => authStore.user?.email ?? '')
-const roleLabel = computed(() => (authStore.user?.role === 'operation' ? 'Operations' : 'CS Agent'))
-const userInitials = computed(() => (authStore.user?.role === 'operation' ? 'OP' : 'CS'))
+const roleLabel = computed(() => (authStore.user?.role === UserRole.OPERATION ? 'Operations' : 'CS Agent'))
+const userInitials = computed(() => (authStore.user?.role === UserRole.OPERATION ? 'OP' : 'CS'))
 
 const { displayText: headerText } = useTypewriter([
     `Selamat ${greetingWord}, ${userEmail.value}`,
@@ -50,7 +52,7 @@ const { displayText: headerText } = useTypewriter([
 
 function handleLogout() {
     authStore.logout()
-    router.push('/login')
+    router.push(ROUTE_LOGIN)
 }
 </script>
 
