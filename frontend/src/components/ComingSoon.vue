@@ -11,7 +11,7 @@ function goBack() {
 </script>
 
 <template>
-  <div class="flex h-screen w-screen flex-col items-center justify-center gap-2 bg-[#F6F6F8] px-6 text-center font-sans text-[#14151C]">
+  <div class="flex h-full min-h-[60vh] w-full flex-col items-center justify-center gap-2 bg-[#F6F6F8] px-6 text-center font-sans text-[#14151C]">
     <LottiePlayer
       :animation-data="developmentAnimation"
       class="animate-page-enter-media h-[300px] w-[300px]"

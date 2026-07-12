@@ -1,7 +1,22 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import LottiePlayer from '../components/LottiePlayer.vue'
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import loginAnimation from '../assets/animation/login-animation.json'
+
+const router = useRouter()
+
+const email = ref('')
+const password = ref('')
+const isSigningIn = ref(false)
+
+function handleSubmit() {
+  isSigningIn.value = true
+  setTimeout(() => {
+    router.push('/dashboard')
+  }, 450)
+}
 </script>
 
 <template>
@@ -49,11 +64,13 @@ import loginAnimation from '../assets/animation/login-animation.json'
         <div class="mb-2 text-2xl font-bold">Welcome back</div>
         <div class="mb-7 text-[15px] text-[#6B6B76]">Sign in to access the payments dashboard.</div>
 
-        <form class="flex flex-col gap-4">
+        <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
           <div>
             <label class="mb-1.5 block text-[13px] font-semibold text-[#3A3B45]">Email</label>
             <input
+              v-model="email"
               type="email"
+              required
               placeholder="you@durianpay.id"
               class="w-full rounded-[10px] border border-[#E5E5EA] px-3.5 py-3 font-sans text-[15px] text-[#14151C] placeholder-[#ACACB4] outline-none"
             />
@@ -61,7 +78,9 @@ import loginAnimation from '../assets/animation/login-animation.json'
           <div>
             <label class="mb-1.5 block text-[13px] font-semibold text-[#3A3B45]">Password</label>
             <input
+              v-model="password"
               type="password"
+              required
               placeholder="••••••••"
               class="w-full rounded-[10px] border border-[#E5E5EA] px-3.5 py-3 font-sans text-[15px] text-[#14151C] placeholder-[#ACACB4] outline-none"
             />
@@ -69,32 +88,12 @@ import loginAnimation from '../assets/animation/login-animation.json'
 
           <button
             type="submit"
-            class="mt-1 cursor-pointer rounded-[10px] border-none bg-[#E31C4D] p-[13px] font-sans text-[15px] font-semibold text-white transition-colors hover:bg-[#B8123A]"
+            :disabled="isSigningIn"
+            class="mt-1 cursor-pointer rounded-[10px] border-none bg-[#E31C4D] p-[13px] font-sans text-[15px] font-semibold text-white transition-colors hover:bg-[#B8123A] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Sign in
+            {{ isSigningIn ? 'Signing in…' : 'Sign in' }}
           </button>
         </form>
-
-        <div class="mt-6 rounded-[10px] bg-[#F6F6F8] p-4 text-[13px] leading-loose text-[#6B6B76]">
-          <div class="mb-1.5 font-semibold text-[#3A3B45]">Demo credentials</div>
-          <div>CS Agent — cs@durianpay.id / password</div>
-          <div>Operations — ops@durianpay.id / password</div>
-        </div>
-
-        <div class="mt-3 flex gap-2.5">
-          <button
-            type="button"
-            class="flex-1 cursor-pointer rounded-lg border border-[#E5E5EA] bg-white p-2.5 font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA]"
-          >
-            Continue as CS
-          </button>
-          <button
-            type="button"
-            class="flex-1 cursor-pointer rounded-lg border border-[#E5E5EA] bg-white p-2.5 font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA]"
-          >
-            Continue as Operations
-          </button>
-        </div>
       </div>
     </div>
   </div>
