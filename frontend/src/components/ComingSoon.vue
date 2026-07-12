@@ -11,7 +11,7 @@ function goBack() {
 </script>
 
 <template>
-  <div class="flex h-full min-h-[60vh] w-full flex-col items-center justify-center gap-2 bg-[#F6F6F8] px-6 text-center font-sans text-[#14151C]">
+  <div class="flex h-full min-h-[60vh] w-full flex-col items-center justify-center gap-2 bg-bg-page px-6 text-center font-sans text-text-primary">
     <LottiePlayer
       :animation-data="developmentAnimation"
       class="animate-page-enter-media h-[300px] w-[300px]"
@@ -26,7 +26,7 @@ function goBack() {
     </h1>
 
     <p
-      class="animate-page-enter-up max-w-[520px] text-sm leading-relaxed text-[#6B6B76]"
+      class="animate-page-enter-up max-w-[520px] text-sm leading-relaxed text-text-muted"
       style="animation-delay: 0.6s"
     >
       Halaman ini sedang dalam pengembangan. Mohon tunggu beberapa saat hingga kurun waktu
@@ -39,7 +39,7 @@ function goBack() {
       <div class="animate-page-enter-up" style="animation-delay: 0.9s">
         <RouterLink
           to="/dashboard"
-          class="inline-block cursor-pointer rounded-[10px] bg-[#E31C4D] px-5 py-2.5 font-sans text-sm font-semibold text-white transition-colors hover:bg-[#B8123A]"
+          class="inline-block cursor-pointer rounded-[10px] bg-primary px-5 py-2.5 font-sans text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
         >
           Halaman Dashboard
         </RouterLink>
@@ -47,7 +47,7 @@ function goBack() {
       <div class="animate-page-enter-up" style="animation-delay: 1.2s">
         <button
           type="button"
-          class="cursor-pointer rounded-[10px] border border-[#E5E5EA] bg-white px-5 py-2.5 font-sans text-sm font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA]"
+          class="cursor-pointer rounded-[10px] border border-border bg-white px-5 py-2.5 font-sans text-sm font-semibold text-text-primary transition-colors hover:border-border-hover"
           @click="goBack"
         >
           Kembali

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
+import { getErrorMessage } from '../lib/error-message'
 import { AUTH_STORAGE_KEY } from '../constants/storage'
 import type { UserRole } from '../constants/user-role'
 
@@ -49,7 +50,12 @@ export const useAuthStore = defineStore('auth', () => {
     }))
     if (err) {
       isLoading.value = false
-      error.value = err.message
+      error.value = getErrorMessage(err, {
+        overrides: {
+          not_found: 'Email atau password salah.',
+          unauthorized: 'Email atau password salah.',
+        },
+      })
       throw err
     }
     

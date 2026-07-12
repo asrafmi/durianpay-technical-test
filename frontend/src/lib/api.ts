@@ -3,7 +3,7 @@ import { AUTH_STORAGE_KEY } from '../constants/storage'
 import { ROUTE_LOGIN } from '../constants/routes'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: window.__API_BASE_URL__ ?? import.meta.env.VITE_API_BASE_URL,
 })
 
 api.interceptors.request.use((config) => {

@@ -3,12 +3,12 @@ import { ref } from 'vue'
 import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
 import omitEmpty from '../lib/omit-empty'
+import { getErrorMessage } from '../lib/error-message'
 
-interface Payment {
+export interface Payment {
   id: string
   amount: number
   merchant: string
-  currency: string
   status: string
   created_at: string
 }
@@ -20,9 +20,19 @@ interface PaymentListResponse {
   limit: number
 }
 
+interface PaymentSummaryResponse {
+  total: number
+  success: number
+  processing: number
+  failed: number
+}
+
 interface GetDashboardV1PaymentsParams {
   search?: string
   status?: string
+  sort?: string
+  date_from?: string
+  date_to?: string
   page?: number
   limit?: number
 }
@@ -30,36 +40,62 @@ interface GetDashboardV1PaymentsParams {
 export const usePaymentStore = defineStore('payment', () => {
   const payments = ref<Payment[]>([])
   const total = ref<number>(0)
-  const isLoading = ref<boolean>(false)
+  const isLoadingPaymentList = ref<boolean>(false)
+  
+  const summary = ref<PaymentSummaryResponse | null>(null)
+  const isLoadingPaymentSummary = ref<boolean>(false)
   const error = ref<string | null>(null)
-
+  
   const fetchPayments = async ({
     search,
     status,
+    sort,
+    date_from,
+    date_to,
     page = 1,
     limit = 10,
   }: GetDashboardV1PaymentsParams) => {
-    isLoading.value = true
-    const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, status, page, limit })
+    isLoadingPaymentList.value = true
+    const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, status, sort, date_from, date_to, page, limit })
     const [err, data] = await awaitToError(api.get<PaymentListResponse>('/dashboard/v1/payments', {
       params,
     }))
     if (err) {
-      error.value = err.message
-      isLoading.value = false
+      error.value = getErrorMessage(err)
+      isLoadingPaymentList.value = false
       return
     }
 
     payments.value = data.data.payments
     total.value = data.data.total
-    isLoading.value = false
+    isLoadingPaymentList.value = false
+  }
+
+  const fetchPaymentSummary = async () => {
+    isLoadingPaymentSummary.value = true
+    const [err, data] = await awaitToError(api.get('/dashboard/v1/payments/summary'))
+    if (err) {
+      error.value = getErrorMessage(err)
+      isLoadingPaymentSummary.value = false
+      return
+    }
+
+    const summaryData: PaymentSummaryResponse = data.data
+    summary.value = summaryData
+    isLoadingPaymentSummary.value = false
   }
 
   return {
-    payments,
-    total,
-    isLoading,
-    error,
-    fetchPayments,
+      payments,
+      total,
+      isLoadingPaymentList,
+      fetchPayments,
+
+      summary,
+      isLoadingPaymentSummary,
+      fetchPaymentSummary,
+
+      error,
+    }
   }
-})
+)

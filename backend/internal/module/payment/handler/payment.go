@@ -38,12 +38,23 @@ func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 }
 
 func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params openapigen.GetDashboardV1PaymentsParams) {
-	var status, merchant string
+	var status, search, sort string
 	if params.Status != nil {
 		status = *params.Status
 	}
 	if params.Search != nil {
-		merchant = *params.Search
+		search = *params.Search
+	}
+	if params.Sort != nil {
+		sort = *params.Sort
+	}
+
+	var dateFrom, dateTo *time.Time
+	if params.DateFrom != nil {
+		dateFrom = &params.DateFrom.Time
+	}
+	if params.DateTo != nil {
+		dateTo = &params.DateTo.Time
 	}
 
 	var page, limit int
@@ -54,7 +65,7 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		limit = *params.Limit
 	}
 
-	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, merchant, page, limit)
+	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, search, dateFrom, dateTo, page, limit, sort)
 	if err != nil {
 		transport.WriteError(w, err)
 		return
@@ -75,6 +86,25 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		Total:    &total,
 		Page:     &page,
 		Limit:    &limit,
+	})
+	if err != nil {
+		transport.WriteAppError(w, entity.ErrorInternal("internal server error"))
+		return
+	}
+}
+
+func (p *PaymentHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+	summary, err := p.paymentUC.GetPaymentSummary()
+	if err != nil {
+		transport.WriteError(w, err)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(openapigen.PaymentSummaryResponse{
+		Total:      &summary.Total,
+		Success:    &summary.Success,
+		Failed:     &summary.Failed,
+		Processing: &summary.Processing,
 	})
 	if err != nil {
 		transport.WriteAppError(w, entity.ErrorInternal("internal server error"))

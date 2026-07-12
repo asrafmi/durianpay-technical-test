@@ -19,6 +19,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
@@ -61,6 +62,14 @@ type PaymentListResponse struct {
 	Total    *int       `json:"total,omitempty"`
 }
 
+// PaymentSummaryResponse defines model for PaymentSummaryResponse.
+type PaymentSummaryResponse struct {
+	Failed     *int `json:"failed,omitempty"`
+	Processing *int `json:"processing,omitempty"`
+	Success    *int `json:"success,omitempty"`
+	Total      *int `json:"total,omitempty"`
+}
+
 // UnauthorizedError defines model for UnauthorizedError.
 type UnauthorizedError = Error
 
@@ -81,11 +90,14 @@ type GetDashboardV1PaymentsParams struct {
 	// Status status of payment (completed , processing , or failed)
 	Status *string `form:"status,omitempty" json:"status,omitempty"`
 
-	// Id payment id
-	Id *string `form:"id,omitempty" json:"id,omitempty"`
-
-	// Search search payments by merchant name
+	// Search search payments by merchant name or payment id
 	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// DateFrom filter payments created on or after this date (YYYY-MM-DD)
+	DateFrom *openapi_types.Date `form:"date_from,omitempty" json:"date_from,omitempty"`
+
+	// DateTo filter payments created on or before this date (YYYY-MM-DD)
+	DateTo *openapi_types.Date `form:"date_to,omitempty" json:"date_to,omitempty"`
 
 	// Page page number (1-indexed)
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
@@ -105,6 +117,9 @@ type ServerInterface interface {
 	// List of payments
 	// (GET /dashboard/v1/payments)
 	GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params GetDashboardV1PaymentsParams)
+	// Get payment summary
+	// (GET /dashboard/v1/payments/summary)
+	GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -120,6 +135,12 @@ func (_ Unimplemented) PostDashboardV1AuthLogin(w http.ResponseWriter, r *http.R
 // List of payments
 // (GET /dashboard/v1/payments)
 func (_ Unimplemented) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params GetDashboardV1PaymentsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get payment summary
+// (GET /dashboard/v1/payments/summary)
+func (_ Unimplemented) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -187,19 +208,6 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 		return
 	}
 
-	// ------------- Optional query parameter "id" -------------
-
-	err = runtime.BindQueryParameterWithOptions("form", true, false, "id", r.URL.Query(), &params.Id, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
-	if err != nil {
-		var requiredError *runtime.RequiredParameterError
-		if errors.As(err, &requiredError) {
-			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "id"})
-		} else {
-			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
-		}
-		return
-	}
-
 	// ------------- Optional query parameter "search" -------------
 
 	err = runtime.BindQueryParameterWithOptions("form", true, false, "search", r.URL.Query(), &params.Search, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
@@ -209,6 +217,32 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "search"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "date_from" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "date_from", r.URL.Query(), &params.DateFrom, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "date_from"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_from", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "date_to" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "date_to", r.URL.Query(), &params.DateTo, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "date_to"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_to", Err: err})
 		}
 		return
 	}
@@ -241,6 +275,26 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetDashboardV1Payments(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetDashboardV1PaymentsSummary operation middleware
+func (siw *ServerInterfaceWrapper) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDashboardV1PaymentsSummary(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -369,6 +423,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/dashboard/v1/payments", wrapper.GetDashboardV1Payments)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/dashboard/v1/payments/summary", wrapper.GetDashboardV1PaymentsSummary)
+	})
 
 	return r
 }
@@ -378,23 +435,25 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"pFbfb9s2EP5XCG4PDaZYctuHQsAesnUbOrRAsK3bQxbMtHi22Ymkejyl8QL/78ORsi1ZMpK2T4bF4333",
-	"ffeD9yArbxvvwFGQ5YNsFCoLBBj/BY/EvxpChaYh450s5Y/eWnUZgG0JtGArsTJQ6zATfOidaBQRoAul",
-	"WFxWCGz3j6KFeNYgrMy9WFwuxPeC/V6IhbK+dXzovBicq1Bd/O1kJg3jfmwBtzKTTlmQZQouk6HagFUc",
-	"Jdwr29R81IOUmaRtE+0JjVvL3W6XSYTQeBcgsnzr18b91n3hD5V3BC4yV01Tm0ox8/xDYPoPPcRvEVay",
-	"lN/kRxHzdBry9wEwgQ3VQ6AWnSD/LzihnBZtABTGrTzaiCN3mbxWWwuO3ppAXxRYg74BJJMI1sYaGig0",
-	"Lw6yGEew5lAz2ag1DM2mrWJs0bMhsOExJToyfLfzphDVNv73pOoB5MvnY8zjRb/8ABVNydqBCJaMPb93",
-	"qqWNR/Mf6J8QPT5Bvy6ISKiN98ERG4GO8rbWKtzKUr4zIRi3Fp4Td6dqo1M+ZSbvVN12udJMp5hn0kII",
-	"UdouqoPXUthzniLFp1VaojehydURy3gnVsrUoBlqj1ohaDZQdZBHvMj/oNmwlBKrfr6KySI5UO635dPZ",
-	"j5uWe/Zja5BTcZPCOKLcjgrk0EJjCmnaDCObF8WsKMawmexNkvJBpiaVpdSK4JKMhak7Rp94nzKygNVG",
-	"nQbyrvsqrqbuBFLUhuENLogaeA5nokFfQZI0Y1FTxifVHOkV59VILLDKxAYdxYK+hsmDlMHxyUQXZzJA",
-	"1aKh7e9ceQlyCQoBuXaP/37e6/7rX3/sZz57SqdHghuiJnUCD9QYhKEo0+sWjXLXaiteq7BZeoVaXF2/",
-	"4Y4FDKlf5rNiVjAF34BTjZGlfDErZi8kDz3axOhyvb+e381zrue85vcjSudDTCcLGFvujebJ5AMdMP+c",
-	"M7H44shU0hDoB6+3XzHez+eoUSF88qins9FvqOSjd+N2cuYerxC2cPqQPi+Kc7PqYJcPX9tdJl8W88dv",
-	"jcd5rJ7DRI5exSdDGxGpiO/EgQpbDtPWf8LWMJGzX6Cfsuu9eTbYj26mgz6a5HFF2WWnC1RqY+FXogtE",
-	"PHu8iy/OrUFpJvQfi1GqTwPYwxp9xmk8+AyHARRWmz2dIJZbsZ9vIro8E3u89rmxr0G41i4BxbP5pXEa",
-	"7s+rE1eavn8NK9XWFHcba5yxrZ3cc8bAHaZfibj1iAZQdO6nkNPSNQ1dZNKq+w67KB6J5PZL2mxqg/zK",
-	"ZutGdSz8/pC+ueUQe71oAvWKO3S7DODdvm1arLthXeZ57StVb3yg8lXxqpC7293/AQAA//8=",
+	"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",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

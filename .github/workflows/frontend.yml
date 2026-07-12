@@ -31,10 +31,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm run test
+
       - name: Build
         run: npm run build
-
-      # TODO: no test suite exists yet. Once component tests are added
-      # (with a "test" script in package.json), uncomment this step.
-      # - name: Test
-      #   run: npm run test

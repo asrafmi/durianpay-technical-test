@@ -1,52 +1,55 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 import Pagination from '../components/Pagination.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import PaymentTable from '../components/PaymentTable.vue'
+import PaymentTableSkeleton from '../components/PaymentTableSkeleton.vue'
+import PaymentDetailPanel from '../components/PaymentDetailPanel.vue'
+import TextInput from '../components/TextInput.vue'
+import SummaryCard from '../components/SummaryCard.vue'
+import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
+import DateRangeFilter from '../components/DateRangeFilter.vue'
 
-import { formatCurrency, formatDate, STATUS_META } from '../data/payments'
+import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
 import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
-import { usePaymentStore } from '../stores/payment.ts'
+import { usePaymentStore, type Payment } from '../stores/payment.ts'
+import { usePaymentFilters } from '../composables/usePaymentFilters'
+import { useSlidingIndicator } from '../composables/useSlidingIndicator'
 
 const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
-
 const pageSize = 10
-const searchQuery = ref<string>('')
-const status = ref<StatusFilter>(StatusFilter.ALL)
-const currentPage = ref<number>(1)
+
 const paymentStore = usePaymentStore()
+const {
+    searchQuery,
+    status,
+    sort,
+    dateFrom,
+    dateTo,
+    currentPage,
+    handleStatusChange,
+    handleSortToggle,
+    goToPage,
+    goToPrevPage,
+    goToNextPage,
+} = usePaymentFilters(pageSize)
 
-watchEffect(() => {
-    const fetchPayments = async () => {
-        await paymentStore.fetchPayments({
-            search: searchQuery.value,
-            page: currentPage.value,
-            limit: pageSize,
-            status: status.value,
-        })
-    }
-
-    fetchPayments()
-})
+const selectedPayment = ref<Payment | null>(null)
+const isPanelOpen = ref(false)
 
 const payments = computed(() => paymentStore.payments)
-const total = computed(() => payments.value.length)
-const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize)))
 const rows = computed(() => payments.value.map((p) => ({
     ...p,
     meta: STATUS_META[p.status as keyof typeof STATUS_META]
 })))
-const pct = (n: number) => (total.value ? Math.round((n / total.value) * 100) : 0)
 
-const completed = computed(() => payments.value.filter((p) => p.status === StatusFilter.COMPLETED).length)
-const processing = computed(() => payments.value.filter((p) => p.status === StatusFilter.PROCESSING).length)
-const failed = computed(() => payments.value.filter((p) => p.status === StatusFilter.FAILED).length)
-
-const handleStatusChange = (newStatus: StatusFilter) => {
-    status.value = newStatus
-    currentPage.value = 1
-}
+const total = computed(() => paymentStore.summary?.total ?? 0)
+const completed = computed(() => paymentStore.summary?.success ?? 0)
+const processing = computed(() => paymentStore.summary?.processing ?? 0)
+const failed = computed(() => paymentStore.summary?.failed ?? 0)
+const pct = (n: number) => percentageOf(n, total.value)
 
 const statusFilters = [
     { label: 'All', value: StatusFilter.ALL },
@@ -56,30 +59,20 @@ const statusFilters = [
 ]
 
 const filterRefs = useTemplateRef<HTMLElement[]>('filterItems')
-const pillLeft = ref(0)
-const pillWidth = ref(0)
+const { left: pillLeft, width: pillWidth } = useSlidingIndicator(
+    status,
+    statusFilters.map((item) => item.value),
+    filterRefs,
+)
 
-function updatePill() {
-    const activeIndex = statusFilters.findIndex((item) => item.value === status.value)
-    const el = filterRefs.value?.[activeIndex]
-    if (el) {
-        pillLeft.value = el.offsetLeft
-        pillWidth.value = el.offsetWidth
-    }
+function handleViewDetail(payment: Payment) {
+    selectedPayment.value = payment
+    isPanelOpen.value = true
 }
 
-watch(status, () => nextTick(updatePill), { immediate: true, flush: 'post' })
-
-function goToPage(page: number) {
-    currentPage.value = Math.min(Math.max(1, page), totalPages.value)
-}
-
-function goToPrevPage() {
-    goToPage(currentPage.value - 1)
-}
-
-function goToNextPage() {
-    goToPage(currentPage.value + 1)
+function handleClosePanel() {
+    isPanelOpen.value = false
+    selectedPayment.value = null
 }
 </script>
 
@@ -88,48 +81,39 @@ function goToNextPage() {
         <div>
             <Breadcrumb :items="breadcrumbItems" />
             <div class="mt-2 text-2xl font-bold tracking-tight">Payments</div>
-            <div class="mt-0.5 text-sm text-[#6B6B76]">Monitor and manage incoming payments.</div>
+            <div class="mt-0.5 text-sm text-text-muted">Monitor and manage incoming payments.</div>
         </div>
 
-        <div class="grid grid-cols-4 gap-4">
-            <div class="rounded-[14px] border border-[#E5E5EA] bg-white px-5 py-[18px]">
-                <div class="text-[13px] font-medium text-[#6B6B76]">Total payments</div>
-                <div class="mt-1.5 text-[28px] font-bold">{{ total }}</div>
-                <div class="mt-3.5 flex h-1.5 overflow-hidden rounded-md bg-[#F0F0F3]">
-                    <div class="bg-[#1A9E5C]" :style="{ width: pct(completed) + '%' }"></div>
-                    <div class="bg-[#2563EB]" :style="{ width: pct(processing) + '%' }"></div>
-                    <div class="bg-[#E31C4D]" :style="{ width: pct(failed) + '%' }"></div>
-                </div>
-            </div>
-            <div class="rounded-[14px] border border-[#E5E5EA] bg-white px-5 py-[18px]">
-                <div class="text-[13px] font-medium text-[#6B6B76]">Completed</div>
-                <div class="mt-1.5 text-[28px] font-bold text-[#1A9E5C]">{{ completed }}</div>
-                <div class="mt-3.5 h-1.5 overflow-hidden rounded-md bg-[#F0F0F3]">
-                    <div class="h-full bg-[#1A9E5C]" :style="{ width: pct(completed) + '%' }"></div>
-                </div>
-            </div>
-            <div class="rounded-[14px] border border-[#E5E5EA] bg-white px-5 py-[18px]">
-                <div class="text-[13px] font-medium text-[#6B6B76]">Processing</div>
-                <div class="mt-1.5 text-[28px] font-bold text-[#2563EB]">{{ processing }}</div>
-                <div class="mt-3.5 h-1.5 overflow-hidden rounded-md bg-[#F0F0F3]">
-                    <div class="h-full bg-[#2563EB]" :style="{ width: pct(processing) + '%' }"></div>
-                </div>
-            </div>
-            <div class="rounded-[14px] border border-[#E5E5EA] bg-white px-5 py-[18px]">
-                <div class="text-[13px] font-medium text-[#6B6B76]">Failed</div>
-                <div class="mt-1.5 text-[28px] font-bold text-[#E31C4D]">{{ failed }}</div>
-                <div class="mt-3.5 h-1.5 overflow-hidden rounded-md bg-[#F0F0F3]">
-                    <div class="h-full bg-[#E31C4D]" :style="{ width: pct(failed) + '%' }"></div>
-                </div>
-            </div>
+        <div v-if="paymentStore.error" class="rounded-lg bg-error-bg px-3.5 py-2.5 text-[13px] text-error-text">
+            {{ paymentStore.error }}
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-            <label for="search-field" class="sr-only">Search</label>
-            <input id="search-field" v-model="searchQuery" type="text" placeholder="Search merchant or payment ID…"
-                class="min-w-[220px] flex-1 rounded-[9px] border border-[#E5E5EA] bg-white px-3.5 py-2.5 font-sans text-sm text-[#14151C] placeholder-[#ACACB4] outline-none" />
+        <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <template v-if="paymentStore.isLoadingPaymentSummary">
+                <SummaryCardSkeleton v-for="i in 4" :key="i" />
+            </template>
+            <template v-else>
+                <SummaryCard
+                    label="Total payments"
+                    :value="total"
+                    :percentage="0"
+                    showMultiBar
+                    :bars="[
+                        { color: '#1A9E5C', percentage: pct(completed) },
+                        { color: '#2563EB', percentage: pct(processing) },
+                        { color: '#E31C4D', percentage: pct(failed) },
+                    ]"
+                />
+                <SummaryCard label="Completed" :value="completed" color="#1A9E5C" :percentage="pct(completed)" />
+                <SummaryCard label="Processing" :value="processing" color="#2563EB" :percentage="pct(processing)" />
+                <SummaryCard label="Failed" :value="failed" color="#E31C4D" :percentage="pct(failed)" />
+            </template>
+        </div>
 
-            <div class="relative flex gap-0.5 rounded-[9px] bg-[#EFEFF2] p-0.75">
+        <div class="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+            <TextInput v-model="searchQuery" id="search-field" placeholder="Search merchant or payment ID…" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
+
+            <div class="relative flex gap-0.5 overflow-x-auto rounded-[9px] bg-bg-light p-0.75">
                 <span
                     class="absolute top-0.75 bottom-0.75 rounded-[7px] bg-white shadow-sm transition-[left,width] duration-300 ease-out"
                     :style="{ left: pillLeft + 'px', width: pillWidth + 'px' }"
@@ -139,73 +123,42 @@ function goToNextPage() {
                     :key="item.value"
                     ref="filterItems"
                     type="button"
-                    class="relative cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold transition-colors"
-                    :class="status === item.value ? 'text-[#14151C]' : 'text-[#6B6B76]'"
+                    class="relative shrink-0 cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold whitespace-nowrap transition-colors"
+                    :class="status === item.value ? 'text-text-primary' : 'text-text-muted'"
                     @click="handleStatusChange(item.value)"
                 >
                     {{ item.label }}
                 </button>
             </div>
+
+            <DateRangeFilter v-model:date-from="dateFrom" v-model:date-to="dateTo" />
         </div>
 
-        <div class="overflow-hidden rounded-[14px] border border-[#E5E5EA] bg-white">
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-sm">
-                    <thead>
-                        <tr class="border-b border-[#E5E5EA]">
-                            <th
-                                class="px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-[#6B6B76] uppercase">
-                                Payment ID
-                            </th>
-                            <th
-                                class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-[#6B6B76] uppercase select-none">
-                                Merchant
-                            </th>
-                            <th
-                                class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-[#6B6B76] uppercase select-none">
-                                Date ▼
-                            </th>
-                            <th
-                                class="cursor-pointer px-5 py-[15px] text-right text-xs font-semibold tracking-wide text-[#6B6B76] uppercase select-none">
-                                Amount
-                            </th>
-                            <th
-                                class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-[#6B6B76] uppercase select-none">
-                                Status
-                            </th>
-                            <th
-                                class="px-5 py-[15px] text-right text-xs font-semibold tracking-wide text-[#6B6B76] uppercase">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="p in rows" :key="p.id"
-                            class="cursor-pointer border-b border-[#F0F0F3] transition-colors hover:bg-[#FAFAFB]">
-                            <td class="px-5 py-[15px] font-mono text-[13px] text-[#6B6B76]">{{ p.id }}</td>
-                            <td class="px-5 py-[15px] font-semibold">{{ p.merchant }}</td>
-                            <td class="px-5 py-[15px] text-[#6B6B76]">{{ formatDate(p.created_at) }}</td>
-                            <td class="px-5 py-[15px] text-right font-semibold">{{ formatCurrency(p.amount) }}</td>
-                            <td class="px-5 py-[15px]">
-                                <span class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
-                                    :style="{ background: p.meta.bg, color: p.meta.color }">
-                                    {{ p.meta.label }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <PaymentTableSkeleton v-if="paymentStore.isLoadingPaymentList" />
+        <PaymentTable
+            v-else
+            :rows="rows"
+            :formatDate="formatDate"
+            :formatCurrency="formatCurrency"
+            :sort="sort"
+            @sort-toggle="handleSortToggle"
+            @view-detail="handleViewDetail"
+        />
 
-            <Pagination
-                :rows="rows"
-                :total="paymentStore.total"
-                :currentPage="currentPage"
-                :pageSize="pageSize"
-                :goToPage="goToPage"
-                :goToPrevPage="goToPrevPage"
-                :goToNextPage="goToNextPage"
-            />
-        </div>
+        <Pagination
+            :rows="rows"
+            :total="paymentStore.total"
+            :currentPage="currentPage"
+            :pageSize="pageSize"
+            :goToPage="goToPage"
+            :goToPrevPage="goToPrevPage"
+            :goToNextPage="goToNextPage"
+        />
     </div>
+
+    <PaymentDetailPanel
+        :payment="selectedPayment"
+        :isOpen="isPanelOpen"
+        @close="handleClosePanel"
+    />
 </template>

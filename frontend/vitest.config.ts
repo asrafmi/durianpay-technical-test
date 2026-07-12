@@ -1,0 +1,19 @@
+import { defineConfig, mergeConfig } from 'vitest/config'
+import viteConfig from './vite.config'
+
+export default mergeConfig(
+  viteConfig,
+  defineConfig({
+    test: {
+      environment: 'jsdom',
+      environmentOptions: {
+        jsdom: {
+          url: 'http://localhost:3000',
+        },
+      },
+      globals: true,
+      include: ['src/**/*.spec.ts'],
+      setupFiles: ['./src/test-setup.ts'],
+    },
+  }),
+)
