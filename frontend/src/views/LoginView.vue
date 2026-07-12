@@ -1,26 +1,7 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
-import lottie, { type AnimationItem } from 'lottie-web'
+import LottiePlayer from '../components/LottiePlayer.vue'
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
-import loginAnimation from '../assets/login-animation.json'
-
-const lottieContainer = useTemplateRef<HTMLDivElement>('lottieContainer')
-let animationInstance: AnimationItem | null = null
-
-onMounted(() => {
-  if (!lottieContainer.value) return
-  animationInstance = lottie.loadAnimation({
-    container: lottieContainer.value,
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    animationData: loginAnimation,
-  })
-})
-
-onBeforeUnmount(() => {
-  animationInstance?.destroy()
-})
+import loginAnimation from '../assets/animation/login-animation.json'
 </script>
 
 <template>
@@ -35,7 +16,7 @@ onBeforeUnmount(() => {
 
       <div>
         <div class="relative mb-2 h-[260px] w-[260px]">
-          <div ref="lottieContainer" class="h-[260px] w-[260px]"></div>
+          <LottiePlayer :animation-data="loginAnimation" class="h-[260px] w-[260px]" />
           <div
             class="animate-float-a absolute top-1.5 -left-7 h-[22px] w-[22px] text-center text-[22px] leading-[22px] text-[#5A5B66]"
           >

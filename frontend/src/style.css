@@ -57,3 +57,33 @@ body {
 .animate-float-d {
   animation: floatD 6.5s ease-in-out infinite;
 }
+
+@keyframes pageEnterMedia {
+  from {
+    opacity: 0;
+    transform: translateY(100px) scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes pageEnterUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter-media {
+  opacity: 0;
+  animation: pageEnterMedia 0.5s ease-in-out forwards;
+}
+.animate-page-enter-up {
+  opacity: 0;
+  animation: pageEnterUp 0.5s ease-in-out forwards;
+}
