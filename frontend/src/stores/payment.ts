@@ -4,11 +4,10 @@ import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
 import omitEmpty from '../lib/omit-empty'
 
-interface Payment {
+export interface Payment {
   id: string
   amount: number
   merchant: string
-  currency: string
   status: string
   created_at: string
 }

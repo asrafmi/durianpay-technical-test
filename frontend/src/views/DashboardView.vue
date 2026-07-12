@@ -1,65 +1,50 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 import Pagination from '../components/Pagination.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import PaymentTable from '../components/PaymentTable.vue'
+import PaymentDetailPanel from '../components/PaymentDetailPanel.vue'
 import TextInput from '../components/TextInput.vue'
 import SummaryCard from '../components/SummaryCard.vue'
 
-import { formatCurrency, formatDate, STATUS_META } from '../data/payments'
+import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../data/payments'
 import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
-import { usePaymentStore } from '../stores/payment.ts'
+import { usePaymentStore, type Payment } from '../stores/payment.ts'
+import { usePaymentFilters } from '../composables/usePaymentFilters'
+import { useSlidingIndicator } from '../composables/useSlidingIndicator'
 
 const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
-
 const pageSize = 10
-const searchQuery = ref<string>('')
-const status = ref<StatusFilter>(StatusFilter.ALL)
-const sort = ref<string>('-created_at')
-const currentPage = ref<number>(1)
+
 const paymentStore = usePaymentStore()
-watchEffect(() => {
-    const fetchPayments = async () => {
-        await paymentStore.fetchPayments({
-            search: searchQuery.value,
-            page: currentPage.value,
-            limit: pageSize,
-            status: status.value,
-            sort: sort.value,
-        })
-    }
+const {
+    searchQuery,
+    status,
+    sort,
+    currentPage,
+    handleStatusChange,
+    handleSortToggle,
+    goToPage,
+    goToPrevPage,
+    goToNextPage,
+} = usePaymentFilters(pageSize)
 
-    const fetchPaymentSummary = async () => {
-        await paymentStore.fetchPaymentSummary()
-    }
-
-    Promise.all([fetchPayments(), fetchPaymentSummary()])
-})
+const selectedPayment = ref<Payment | null>(null)
+const isPanelOpen = ref(false)
 
 const payments = computed(() => paymentStore.payments)
-const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize)))
 const rows = computed(() => payments.value.map((p) => ({
     ...p,
     meta: STATUS_META[p.status as keyof typeof STATUS_META]
 })))
-const pct = (n: number) => (total.value ? Math.round((n / total.value) * 100) : 0)
 
 const total = computed(() => paymentStore.summary?.total ?? 0)
 const completed = computed(() => paymentStore.summary?.success ?? 0)
 const processing = computed(() => paymentStore.summary?.processing ?? 0)
 const failed = computed(() => paymentStore.summary?.failed ?? 0)
-
-const handleStatusChange = (newStatus: StatusFilter) => {
-    status.value = newStatus
-    currentPage.value = 1
-}
-
-const handleSortToggle = () => {
-    sort.value = sort.value === '-created_at' ? 'created_at' : '-created_at'
-    currentPage.value = 1
-}
+const pct = (n: number) => percentageOf(n, total.value)
 
 const statusFilters = [
     { label: 'All', value: StatusFilter.ALL },
@@ -69,30 +54,20 @@ const statusFilters = [
 ]
 
 const filterRefs = useTemplateRef<HTMLElement[]>('filterItems')
-const pillLeft = ref(0)
-const pillWidth = ref(0)
+const { left: pillLeft, width: pillWidth } = useSlidingIndicator(
+    status,
+    statusFilters.map((item) => item.value),
+    filterRefs,
+)
 
-function updatePill() {
-    const activeIndex = statusFilters.findIndex((item) => item.value === status.value)
-    const el = filterRefs.value?.[activeIndex]
-    if (el) {
-        pillLeft.value = el.offsetLeft
-        pillWidth.value = el.offsetWidth
-    }
+function handleViewDetail(payment: Payment) {
+    selectedPayment.value = payment
+    isPanelOpen.value = true
 }
 
-watch(status, () => nextTick(updatePill), { immediate: true, flush: 'post' })
-
-function goToPage(page: number) {
-    currentPage.value = Math.min(Math.max(1, page), totalPages.value)
-}
-
-function goToPrevPage() {
-    goToPage(currentPage.value - 1)
-}
-
-function goToNextPage() {
-    goToPage(currentPage.value + 1)
+function handleClosePanel() {
+    isPanelOpen.value = false
+    selectedPayment.value = null
 }
 </script>
 
@@ -149,6 +124,7 @@ function goToNextPage() {
             :formatCurrency="formatCurrency"
             :sort="sort"
             @sort-toggle="handleSortToggle"
+            @view-detail="handleViewDetail"
         />
 
         <Pagination
@@ -161,4 +137,10 @@ function goToNextPage() {
             :goToNextPage="goToNextPage"
         />
     </div>
+
+    <PaymentDetailPanel
+        :payment="selectedPayment"
+        :isOpen="isPanelOpen"
+        @close="handleClosePanel"
+    />
 </template>

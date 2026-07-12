@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { computed, nextTick, ref, watch, useTemplateRef } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import { useTypewriter } from '../composables/useTypewriter'
+import { useSlidingIndicator } from '../composables/useSlidingIndicator'
 import { useAuthStore } from '../stores/auth'
 import { ROUTE_LOGIN, ROUTE_DASHBOARD, ROUTE_SETTLEMENTS } from '../constants/routes'
 import { UserRole } from '../constants/user-role'
@@ -20,17 +21,14 @@ const sidebarItems = [
 ]
 
 const navRefs = useTemplateRef<{ $el: HTMLElement }[]>('navItems')
-const indicatorTop = ref(0)
-
 const INDICATOR_HEIGHT = 20
 
-function updateIndicator() {
-    const activeIndex = sidebarItems.findIndex((item) => item.path === currentPath.value)
-    const el = navRefs.value?.[activeIndex]?.$el
-    if (el) indicatorTop.value = el.offsetTop + (el.offsetHeight - INDICATOR_HEIGHT) / 2
-}
-
-watch(currentPath, () => nextTick(updateIndicator), { immediate: true, flush: 'post' })
+const { top: navTop, height: navHeight } = useSlidingIndicator(
+    currentPath,
+    sidebarItems.map((item) => item.path),
+    navRefs,
+)
+const indicatorTop = computed(() => navTop.value + (navHeight.value - INDICATOR_HEIGHT) / 2)
 
 function getGreetingWord(hour: number): string {
     if (hour < 11) return 'Pagi'

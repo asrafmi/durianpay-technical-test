@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ArrowUp } from '@lucide/vue'
+import { ArrowUp, Eye } from '@lucide/vue'
+import type { Payment } from '../stores/payment'
 
-interface PaymentRow {
-  id: string
-  merchant: string
-  created_at: string
-  amount: number
+interface PaymentRow extends Payment {
   meta: {
     label: string
     bg: string
@@ -22,6 +19,7 @@ defineProps<{
 
 defineEmits<{
   'sort-toggle': []
+  'view-detail': [row: PaymentRow]
 }>()
 </script>
 
@@ -61,7 +59,7 @@ defineEmits<{
         </thead>
         <tbody>
           <tr v-for="p in rows" :key="p.id"
-              class="cursor-pointer border-b border-bg-light transition-colors hover:bg-bg-hover">
+              class="border-b border-bg-light transition-colors hover:bg-bg-hover">
             <td class="px-5 py-[15px] font-mono text-[13px] text-text-muted">{{ p.id }}</td>
             <td class="px-5 py-[15px] font-semibold">{{ p.merchant }}</td>
             <td class="px-5 py-[15px] text-text-muted">{{ formatDate(p.created_at) }}</td>
@@ -71,6 +69,16 @@ defineEmits<{
                     :style="{ background: p.meta.bg, color: p.meta.color }">
                 {{ p.meta.label }}
               </span>
+            </td>
+            <td class="px-5 py-[15px] text-right">
+              <button
+                type="button"
+                @click="$emit('view-detail', p)"
+                class="cursor-pointer inline-flex items-center justify-center rounded-lg p-2 hover:bg-[#F0F0F3] transition-colors text-[#6B6B76] hover:text-[#14151C]"
+                title="View details"
+              >
+                <Eye :size="18" />
+              </button>
             </td>
           </tr>
         </tbody>

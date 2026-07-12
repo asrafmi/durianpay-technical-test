@@ -23,3 +23,7 @@ export function formatDate(d: string): string {
   const date = new Date(d)
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 }
+
+export function percentageOf(value: number, total: number): number {
+  return total ? Math.round((value / total) * 100) : 0
+}
