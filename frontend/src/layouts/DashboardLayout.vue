@@ -65,18 +65,11 @@ function handleLogout() {
             </div>
 
             <nav class="relative flex flex-col gap-0.5">
-                <span
-                    class="absolute left-3 h-5 w-1 rounded-sm bg-primary transition-[top] duration-300 ease-out"
-                    :style="{ top: indicatorTop + 'px' }"
-                />
-                <router-link
-                    v-for="item in sidebarItems"
-                    :key="item.path"
-                    ref="navItems"
-                    :to="item.path"
+                <span class="absolute left-3 h-5 w-1 rounded-sm bg-primary transition-[top] duration-300 ease-out"
+                    :style="{ top: indicatorTop + 'px' }" />
+                <router-link v-for="item in sidebarItems" :key="item.path" ref="navItems" :to="item.path"
                     class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 pl-6 text-sm font-semibold text-white transition-colors hover:bg-white/8"
-                    :class="{ 'bg-white/8': currentPath === item.path }"
-                >
+                    :class="{ 'bg-white/8': currentPath === item.path }">
                     <span>{{ item.name }}</span>
                 </router-link>
             </nav>
@@ -85,11 +78,9 @@ function handleLogout() {
                 <div class="mt-3 text-[13px] font-semibold text-white">{{ userEmail }}</div>
                 <div class="mt-0.5 text-xs text-text-secondary">{{ roleLabel }}</div>
 
-                <button
-                    type="button"
+                <button type="button"
                     class="mt-3 w-full cursor-pointer rounded-lg border border-border-dark bg-transparent p-2 font-sans text-[13px] text-text-divider transition-colors hover:border-text-label hover:text-white"
-                    @click="handleLogout"
-                >
+                    @click="handleLogout">
                     Log out
                 </button>
             </div>
@@ -103,18 +94,15 @@ function handleLogout() {
                             {{ headerText }}
                         </div>
                     </div>
-                    <span class="rounded-full border border-border bg-bg-page px-2 py-0.5 text-[11px] font-semibold text-text-label">
-                					{{ roleLabel }}
-                					</span>
+                    <span
+                        class="rounded-full border border-border bg-bg-page px-2 py-0.5 text-[11px] font-semibold text-text-label">
+                        {{ roleLabel }}
+                    </span>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" aria-label="Toggle theme" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border bg-white text-text-muted transition-colors hover:border-border-hover">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                            </svg>
-                          </button>
-                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-bg-dark text-xs font-bold text-white">
+                    <div
+                        class="flex h-9 w-9 items-center justify-center rounded-full bg-bg-dark text-xs font-bold text-white">
                         {{ userInitials }}
                     </div>
                 </div>

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"regexp"
 	"strings"
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
@@ -11,7 +12,7 @@ import (
 const errDB = "db error"
 
 type PaymentRepository interface {
-	GetListPayments(status entity.PaymentStatus, merchant string, page, limit int) ([]entity.Payment, error)
+	GetListPayments(status entity.PaymentStatus, merchant string, page, limit int, sort string) ([]entity.Payment, error)
 	CountPayments(status entity.PaymentStatus, merchant string) (int, error)
 	GetPaymentsSummary() (entity.PaymentSummary, error)
 }
@@ -44,9 +45,52 @@ func whereClause(status entity.PaymentStatus, merchant string) (string, []any) {
 	return " WHERE " + strings.Join(conditions, " AND "), args
 }
 
-func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, merchant string, page, limit int) ([]entity.Payment, error) {
+func parseSort(sort string) string {
+	if sort == "" {
+		return " ORDER BY created_at DESC"
+	}
+
+	validFields := map[string]bool{
+		"created_at": true,
+		"amount":     true,
+		"merchant":   true,
+		"status":     true,
+	}
+
+	orderBy := " ORDER BY "
+	fields := strings.Split(sort, ",")
+	var orders []string
+
+	for _, field := range fields {
+		field = strings.TrimSpace(field)
+		direction := "ASC"
+		if strings.HasPrefix(field, "-") {
+			field = field[1:]
+			direction = "DESC"
+		}
+
+		if !validFields[field] {
+			continue
+		}
+
+		if match, _ := regexp.MatchString("^[a-z_]+$", field); !match {
+			continue
+		}
+
+		orders = append(orders, field+" "+direction)
+	}
+
+	if len(orders) == 0 {
+		return " ORDER BY created_at DESC"
+	}
+
+	return orderBy + strings.Join(orders, ", ")
+}
+
+func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, merchant string, page, limit int, sort string) ([]entity.Payment, error) {
 	where, args := whereClause(status, merchant)
-	query := "SELECT id, merchant, status, amount, created_at FROM payments" + where + " LIMIT ? OFFSET ?"
+	orderBy := parseSort(sort)
+	query := "SELECT id, merchant, status, amount, created_at FROM payments" + where + orderBy + " LIMIT ? OFFSET ?"
 	args = append(args, limit, pagination.Offset(page, limit))
 
 	rows, err := r.db.Query(query, args...)

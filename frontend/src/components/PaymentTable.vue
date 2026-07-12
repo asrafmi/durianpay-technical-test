@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ArrowUp } from '@lucide/vue'
+
 interface PaymentRow {
   id: string
   merchant: string
@@ -15,6 +17,11 @@ defineProps<{
   rows: PaymentRow[]
   formatDate: (date: string) => string
   formatCurrency: (amount: number) => string
+  sort: string
+}>()
+
+defineEmits<{
+  'sort-toggle': []
 }>()
 </script>
 
@@ -30,8 +37,16 @@ defineProps<{
             <th class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
               Merchant
             </th>
-            <th class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
-              Date ▼
+            <th class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase select-none"
+                @click="$emit('sort-toggle')">
+              <div class="flex items-center gap-1.5">
+                <span>Date</span>
+                <ArrowUp
+                  :size="16"
+                  class="transition-transform duration-300"
+                  :style="{ transform: sort === '-created_at' ? 'rotate(180deg)' : 'rotate(0deg)' }"
+                />
+              </div>
             </th>
             <th class="cursor-pointer px-5 py-[15px] text-right text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
               Amount

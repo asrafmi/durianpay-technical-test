@@ -16,13 +16,15 @@ type fakePaymentRepo struct {
 	gotMerchant string
 	gotPage     int
 	gotLimit    int
+	gotSort     string
 }
 
-func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, merchant string, page, limit int) ([]entity.Payment, error) {
+func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, merchant string, page, limit int, sort string) ([]entity.Payment, error) {
 	f.gotStatus = status
 	f.gotMerchant = merchant
 	f.gotPage = page
 	f.gotLimit = limit
+	f.gotSort = sort
 	if f.err != nil {
 		return nil, f.err
 	}
@@ -91,7 +93,7 @@ func TestPayment_GetListPayments_NormalizesPagination(t *testing.T) {
 			repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
 			uc := NewPaymentUsecase(repo)
 
-			_, _, gotPage, gotLimit, err := uc.GetListPayments("", "", tt.inPage, tt.inLimit)
+			_, _, gotPage, gotLimit, err := uc.GetListPayments("", "", tt.inPage, tt.inLimit, "")
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -113,7 +115,7 @@ func TestPayment_GetListPayments_PassesFiltersThrough(t *testing.T) {
 	repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
 	uc := NewPaymentUsecase(repo)
 
-	_, _, _, _, err := uc.GetListPayments("completed", "toko", 1, 10)
+	_, _, _, _, err := uc.GetListPayments("completed", "toko", 1, 10, "-created_at")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -134,7 +136,7 @@ func TestPayment_GetListPayments_ReturnsPaymentsAndTotal(t *testing.T) {
 	repo := &fakePaymentRepo{payments: want, total: 42}
 	uc := NewPaymentUsecase(repo)
 
-	got, total, _, _, err := uc.GetListPayments("", "", 1, 10)
+	got, total, _, _, err := uc.GetListPayments("", "", 1, 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -152,7 +154,7 @@ func TestPayment_GetListPayments_PropagatesListError(t *testing.T) {
 	repo := &fakePaymentRepo{err: wantErr}
 	uc := NewPaymentUsecase(repo)
 
-	_, _, _, _, err := uc.GetListPayments("", "", 1, 10)
+	_, _, _, _, err := uc.GetListPayments("", "", 1, 10, "")
 	if !errors.Is(err, wantErr) {
 		t.Errorf("err = %v, want %v", err, wantErr)
 	}

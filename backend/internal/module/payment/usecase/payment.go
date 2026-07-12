@@ -7,7 +7,7 @@ import (
 )
 
 type PaymentUsecase interface {
-	GetListPayments(status, merchant string, page, limit int) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
+	GetListPayments(status, merchant string, page, limit int, sort string) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
 	GetPaymentSummary() (*entity.PaymentSummary, error)
 }
 
@@ -19,10 +19,10 @@ func NewPaymentUsecase(repo repository.PaymentRepository) *Payment {
 	return &Payment{repo: repo}
 }
 
-func (p *Payment) GetListPayments(status, merchant string, page, limit int) ([]entity.Payment, int, int, int, error) {
+func (p *Payment) GetListPayments(status, merchant string, page, limit int, sort string) ([]entity.Payment, int, int, int, error) {
 	page, limit = pagination.Normalize(page, limit)
 
-	payments, err := p.repo.GetListPayments(entity.PaymentStatus(status), merchant, page, limit)
+	payments, err := p.repo.GetListPayments(entity.PaymentStatus(status), merchant, page, limit, sort)
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}

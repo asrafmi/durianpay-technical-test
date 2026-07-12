@@ -17,6 +17,7 @@ const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payme
 const pageSize = 10
 const searchQuery = ref<string>('')
 const status = ref<StatusFilter>(StatusFilter.ALL)
+const sort = ref<string>('-created_at')
 const currentPage = ref<number>(1)
 const paymentStore = usePaymentStore()
 watchEffect(() => {
@@ -26,13 +27,14 @@ watchEffect(() => {
             page: currentPage.value,
             limit: pageSize,
             status: status.value,
+            sort: sort.value,
         })
     }
-    
+
     const fetchPaymentSummary = async () => {
         await paymentStore.fetchPaymentSummary()
     }
-    
+
     Promise.all([fetchPayments(), fetchPaymentSummary()])
 })
 
@@ -51,6 +53,11 @@ const failed = computed(() => paymentStore.summary?.failed ?? 0)
 
 const handleStatusChange = (newStatus: StatusFilter) => {
     status.value = newStatus
+    currentPage.value = 1
+}
+
+const handleSortToggle = () => {
+    sort.value = sort.value === '-created_at' ? 'created_at' : '-created_at'
     currentPage.value = 1
 }
 
@@ -140,6 +147,8 @@ function goToNextPage() {
             :rows="rows"
             :formatDate="formatDate"
             :formatCurrency="formatCurrency"
+            :sort="sort"
+            @sort-toggle="handleSortToggle"
         />
 
         <Pagination
