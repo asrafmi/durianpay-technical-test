@@ -81,7 +81,7 @@ function handleClosePanel() {
             <div class="mt-0.5 text-sm text-text-muted">Monitor and manage incoming payments.</div>
         </div>
 
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <template v-if="paymentStore.isLoadingPaymentSummary">
                 <SummaryCardSkeleton v-for="i in 4" :key="i" />
             </template>
@@ -103,10 +103,10 @@ function handleClosePanel() {
             </template>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-            <TextInput v-model="searchQuery" id="search-field" placeholder="Search merchant or payment ID…" containerClass="min-w-[220px] flex-1" />
+        <div class="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+            <TextInput v-model="searchQuery" id="search-field" placeholder="Search merchant or payment ID…" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
 
-            <div class="relative flex gap-0.5 rounded-[9px] bg-bg-light p-0.75">
+            <div class="relative flex gap-0.5 overflow-x-auto rounded-[9px] bg-bg-light p-0.75">
                 <span
                     class="absolute top-0.75 bottom-0.75 rounded-[7px] bg-white shadow-sm transition-[left,width] duration-300 ease-out"
                     :style="{ left: pillLeft + 'px', width: pillWidth + 'px' }"
@@ -116,7 +116,7 @@ function handleClosePanel() {
                     :key="item.value"
                     ref="filterItems"
                     type="button"
-                    class="relative cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold transition-colors"
+                    class="relative shrink-0 cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold whitespace-nowrap transition-colors"
                     :class="status === item.value ? 'text-text-primary' : 'text-text-muted'"
                     @click="handleStatusChange(item.value)"
                 >

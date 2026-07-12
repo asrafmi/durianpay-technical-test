@@ -24,13 +24,13 @@ const pageNumbers = computed(() => {
 
 </script>
 <template>
-    <div class="flex items-center justify-between border-t border-border px-6 py-4">
+    <div class="flex flex-col items-center gap-3 border-t border-border px-4 py-4 sm:flex-row sm:justify-between sm:px-6">
         <div class="text-[13px] text-text-muted">1–{{ rows.length }} of {{ total }}</div>
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5 overflow-x-auto">
             <button type="button" :disabled="currentPage === 1"
                 class="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border"
                 @click="goToPrevPage">
-                <span aria-hidden="true">‹</span> Back
+                <span aria-hidden="true">‹</span> <span class="hidden sm:inline">Back</span>
             </button>
 
             <button v-if="pageNumbers[0] > 1" type="button"
@@ -59,7 +59,7 @@ const pageNumbers = computed(() => {
             <button type="button" :disabled="currentPage === totalPages"
                 class="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border"
                 @click="goToNextPage">
-                Next <span aria-hidden="true">›</span>
+                <span class="hidden sm:inline">Next</span> <span aria-hidden="true">›</span>
             </button>
         </div>
     </div>
