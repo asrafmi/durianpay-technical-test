@@ -4,9 +4,11 @@ import { computed, ref, useTemplateRef } from 'vue'
 import Pagination from '../components/Pagination.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import PaymentTable from '../components/PaymentTable.vue'
+import PaymentTableSkeleton from '../components/PaymentTableSkeleton.vue'
 import PaymentDetailPanel from '../components/PaymentDetailPanel.vue'
 import TextInput from '../components/TextInput.vue'
 import SummaryCard from '../components/SummaryCard.vue'
+import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 
 import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../data/payments'
 import { StatusFilter } from '../constants/payment-status'
@@ -80,20 +82,25 @@ function handleClosePanel() {
         </div>
 
         <div class="grid grid-cols-4 gap-4">
-            <SummaryCard
-                label="Total payments"
-                :value="total"
-                :percentage="0"
-                showMultiBar
-                :bars="[
-                    { color: '#1A9E5C', percentage: pct(completed) },
-                    { color: '#2563EB', percentage: pct(processing) },
-                    { color: '#E31C4D', percentage: pct(failed) },
-                ]"
-            />
-            <SummaryCard label="Completed" :value="completed" color="#1A9E5C" :percentage="pct(completed)" />
-            <SummaryCard label="Processing" :value="processing" color="#2563EB" :percentage="pct(processing)" />
-            <SummaryCard label="Failed" :value="failed" color="#E31C4D" :percentage="pct(failed)" />
+            <template v-if="paymentStore.isLoadingPaymentSummary">
+                <SummaryCardSkeleton v-for="i in 4" :key="i" />
+            </template>
+            <template v-else>
+                <SummaryCard
+                    label="Total payments"
+                    :value="total"
+                    :percentage="0"
+                    showMultiBar
+                    :bars="[
+                        { color: '#1A9E5C', percentage: pct(completed) },
+                        { color: '#2563EB', percentage: pct(processing) },
+                        { color: '#E31C4D', percentage: pct(failed) },
+                    ]"
+                />
+                <SummaryCard label="Completed" :value="completed" color="#1A9E5C" :percentage="pct(completed)" />
+                <SummaryCard label="Processing" :value="processing" color="#2563EB" :percentage="pct(processing)" />
+                <SummaryCard label="Failed" :value="failed" color="#E31C4D" :percentage="pct(failed)" />
+            </template>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
@@ -118,7 +125,9 @@ function handleClosePanel() {
             </div>
         </div>
 
+        <PaymentTableSkeleton v-if="paymentStore.isLoadingPaymentList" />
         <PaymentTable
+            v-else
             :rows="rows"
             :formatDate="formatDate"
             :formatCurrency="formatCurrency"

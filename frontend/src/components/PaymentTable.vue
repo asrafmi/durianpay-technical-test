@@ -35,9 +35,9 @@ defineEmits<{
             <th class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
               Merchant
             </th>
-            <th class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase select-none"
+            <th class="cursor-pointer px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase select-none"
                 @click="$emit('sort-toggle')">
-              <div class="flex items-center gap-1.5">
+              <div class="flex justify-center items-center gap-1.5">
                 <span>Date</span>
                 <ArrowUp
                   :size="16"
@@ -46,13 +46,13 @@ defineEmits<{
                 />
               </div>
             </th>
-            <th class="cursor-pointer px-5 py-[15px] text-right text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
+            <th class="cursor-pointer px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
               Amount
             </th>
-            <th class="cursor-pointer px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
+            <th class="cursor-pointer px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
               Status
             </th>
-            <th class="px-5 py-[15px] text-right text-xs font-semibold tracking-wide text-text-muted uppercase">
+            <th class="px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase">
               Actions
             </th>
           </tr>
@@ -62,15 +62,15 @@ defineEmits<{
               class="border-b border-bg-light transition-colors hover:bg-bg-hover">
             <td class="px-5 py-[15px] font-mono text-[13px] text-text-muted">{{ p.id }}</td>
             <td class="px-5 py-[15px] font-semibold">{{ p.merchant }}</td>
-            <td class="px-5 py-[15px] text-text-muted">{{ formatDate(p.created_at) }}</td>
-            <td class="px-5 py-[15px] text-right font-semibold">{{ formatCurrency(p.amount) }}</td>
-            <td class="px-5 py-[15px]">
+            <td class="px-5 py-[15px] text-center text-text-muted">{{ formatDate(p.created_at) }}</td>
+            <td class="px-5 py-[15px] text-center font-semibold">{{ formatCurrency(p.amount) }}</td>
+            <td class="px-5 py-[15px] text-center">
               <span class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
                     :style="{ background: p.meta.bg, color: p.meta.color }">
                 {{ p.meta.label }}
               </span>
             </td>
-            <td class="px-5 py-[15px] text-right">
+            <td class="px-5 py-[15px] text-center">
               <button
                 type="button"
                 @click="$emit('view-detail', p)"
