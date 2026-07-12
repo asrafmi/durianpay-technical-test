@@ -7,6 +7,14 @@ A fullstack payment monitoring dashboard: Go REST API backend, Vue 3 + TypeScrip
 
 The API contract is defined in [`openapi.yaml`](openapi.yaml) at the repo root and is the source of truth for both the generated Go server types and the frontend API client.
 
+## Preview
+
+**Login**
+![Login](docs/login.png)
+
+**Dashboard**
+![Dashboard](docs/dashboard.png)
+
 ## Prerequisites
 
 - Go 1.21+ (developed against 1.25)

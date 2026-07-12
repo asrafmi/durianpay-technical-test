@@ -82,12 +82,12 @@ npm run test:watch  # watch mode
 
 Test files are colocated with the source they cover, as `*.spec.ts`. Current coverage:
 
-- **`lib/`** - pure helpers (`omit-empty`, `await-to-error`)
-- **`data/payments.ts`** - formatting/percentage helpers
-- **`composables/`** - `useSlidingIndicator` (shared sliding pill/indicator geometry), `usePaymentFilters` (search/status/sort/page state + fetch orchestration)
+- **`lib/`** - pure helpers (`omit-empty`, `await-to-error`, `payment-format` currency/date/percentage formatting, `error-message` axios error → user-facing message mapping)
+- **`composables/`** - `useSlidingIndicator` (shared sliding pill/indicator geometry), `usePaymentFilters` (search/status/date-range/sort/page state + fetch orchestration), `useDebounce` (mounted against a real component with fake timers to assert the debounced value only updates after the delay), `useSidebar` (collapsed state persisted to `localStorage`)
 - **`stores/`** - `auth` (login/logout, localStorage hydration) and `payment` (fetch payments/summary), with `axios` mocked so no real network calls are made
+- **`components/DateRangeFilter.vue`** - the one component with a mount test, since it owns non-trivial validation logic (from/to ordering, clearing) rather than just rendering props
 
-Component mount tests (e.g. `PaymentTable.vue`, `Pagination.vue`) are not yet covered.
+Other component mount tests (e.g. `PaymentTable.vue`, `Pagination.vue`) are not yet covered - they are mostly presentational, rendering props/emitting events with little logic of their own.
 
 `src/test-setup.ts` polyfills `localStorage` for the test environment - some Node/jsdom version combinations don't reliably expose it, so this keeps `stores/auth.spec.ts` deterministic regardless of the local Node version. It's a no-op if the environment already provides `localStorage`.
 
