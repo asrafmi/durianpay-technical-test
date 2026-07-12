@@ -20,6 +20,13 @@ interface PaymentListResponse {
   limit: number
 }
 
+interface PaymentSummaryResponse {
+  total: number
+  success: number
+  processing: number
+  failed: number
+}
+
 interface GetDashboardV1PaymentsParams {
   search?: string
   status?: string
@@ -30,36 +37,60 @@ interface GetDashboardV1PaymentsParams {
 export const usePaymentStore = defineStore('payment', () => {
   const payments = ref<Payment[]>([])
   const total = ref<number>(0)
-  const isLoading = ref<boolean>(false)
+  const isLoadingPaymentList = ref<boolean>(false)
+  
+  const summary = ref<PaymentSummaryResponse | null>(null)
+  const isLoadingPaymentSummary = ref<boolean>(false)
   const error = ref<string | null>(null)
-
+  
   const fetchPayments = async ({
     search,
     status,
     page = 1,
     limit = 10,
   }: GetDashboardV1PaymentsParams) => {
-    isLoading.value = true
+    isLoadingPaymentList.value = true
     const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, status, page, limit })
     const [err, data] = await awaitToError(api.get<PaymentListResponse>('/dashboard/v1/payments', {
       params,
     }))
     if (err) {
       error.value = err.message
-      isLoading.value = false
+      isLoadingPaymentList.value = false
       return
     }
 
     payments.value = data.data.payments
     total.value = data.data.total
-    isLoading.value = false
+    isLoadingPaymentList.value = false
+  }
+
+  const fetchPaymentSummary = async () => {
+    isLoadingPaymentSummary.value = true
+    const [err, data] = await awaitToError(api.get('/dashboard/v1/payments/summary'))
+    if (err) {
+      error.value = err.message
+      isLoadingPaymentSummary.value = false
+      return
+    }
+
+    const summaryData: PaymentSummaryResponse = data.data
+    console.log('summaryData', summaryData)
+    summary.value = summaryData
+    isLoadingPaymentSummary.value = false
   }
 
   return {
-    payments,
-    total,
-    isLoading,
-    error,
-    fetchPayments,
+      payments,
+      total,
+      isLoadingPaymentList,
+      fetchPayments,
+
+      summary,
+      isLoadingPaymentSummary,
+      fetchPaymentSummary,
+
+      error,
+    }
   }
-})
+)

@@ -16,7 +16,6 @@ const searchQuery = ref<string>('')
 const status = ref<StatusFilter>(StatusFilter.ALL)
 const currentPage = ref<number>(1)
 const paymentStore = usePaymentStore()
-
 watchEffect(() => {
     const fetchPayments = async () => {
         await paymentStore.fetchPayments({
@@ -26,12 +25,16 @@ watchEffect(() => {
             status: status.value,
         })
     }
-
-    fetchPayments()
+    
+    const fetchPaymentSummary = async () => {
+        await paymentStore.fetchPaymentSummary()
+    }
+    
+    Promise.all([fetchPayments(), fetchPaymentSummary()])
 })
+console.log('paymentStore', paymentStore.summary)
 
 const payments = computed(() => paymentStore.payments)
-const total = computed(() => payments.value.length)
 const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize)))
 const rows = computed(() => payments.value.map((p) => ({
     ...p,
@@ -39,9 +42,10 @@ const rows = computed(() => payments.value.map((p) => ({
 })))
 const pct = (n: number) => (total.value ? Math.round((n / total.value) * 100) : 0)
 
-const completed = computed(() => payments.value.filter((p) => p.status === StatusFilter.COMPLETED).length)
-const processing = computed(() => payments.value.filter((p) => p.status === StatusFilter.PROCESSING).length)
-const failed = computed(() => payments.value.filter((p) => p.status === StatusFilter.FAILED).length)
+const total = computed(() => paymentStore.summary?.total ?? 0)
+const completed = computed(() => paymentStore.summary?.success ?? 0)
+const processing = computed(() => paymentStore.summary?.processing ?? 0)
+const failed = computed(() => paymentStore.summary?.failed ?? 0)
 
 const handleStatusChange = (newStatus: StatusFilter) => {
     status.value = newStatus
