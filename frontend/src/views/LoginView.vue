@@ -4,6 +4,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { isAxiosError } from 'axios'
 import { useAuthStore } from '../stores/auth'
 import LottiePlayer from '../components/LottiePlayer.vue'
+import TextInput from '../components/TextInput.vue'
+import Button from '../components/Button.vue'
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
 import loginAnimation from '../assets/animation/login-animation.json'
 import awaitToError from '../lib/await-to-error.ts'
@@ -37,8 +39,8 @@ async function handleSubmit() {
 
 <template>
     <div
-        class="relative grid h-screen w-screen grid-cols-1 overflow-hidden bg-[#F6F6F8] font-sans text-[#14151C] md:grid-cols-2">
-        <div class="hidden flex-col justify-between bg-[#14151C] p-14 md:flex">
+        class="relative grid h-screen w-screen grid-cols-1 overflow-hidden bg-bg-page font-sans text-text-primary md:grid-cols-2">
+        <div class="hidden flex-col justify-between bg-bg-dark p-14 md:flex">
             <div class="flex items-center gap-3">
                 <img :src="durianpayLogo" alt="Durianpay" class="h-10 w-10" />
                 <div class="text-xl font-bold tracking-tight text-white">Durianpay</div>
@@ -70,34 +72,25 @@ async function handleSubmit() {
                 </div>
             </div>
 
-            <div class="text-[13px] text-[#6B6B76]">© 2026 PT Durian Pay Indonesia — Internal Tool</div>
+            <div class="text-[13px] text-text-muted">© 2026 PT Durian Pay Indonesia — Internal Tool</div>
         </div>
 
         <div class="flex items-center justify-center overflow-y-auto bg-white p-10">
             <div class="w-full max-w-[380px]">
                 <div class="mb-2 text-2xl font-bold">Welcome back</div>
-                <div class="mb-7 text-[15px] text-[#6B6B76]">Sign in to access the payments dashboard.</div>
+                <div class="mb-7 text-[15px] text-text-muted">Sign in to access the payments dashboard.</div>
 
                 <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
-                    <div>
-                        <label class="mb-1.5 block text-[13px] font-semibold text-[#3A3B45]">Email</label>
-                        <input v-model="email" type="email" required placeholder="you@durianpay.id"
-                            class="w-full rounded-[10px] border border-[#E5E5EA] px-3.5 py-3 font-sans text-[15px] text-[#14151C] placeholder-[#ACACB4] outline-none" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-[13px] font-semibold text-[#3A3B45]">Password</label>
-                        <input v-model="password" type="password" required placeholder="••••••••"
-                            class="w-full rounded-[10px] border border-[#E5E5EA] px-3.5 py-3 font-sans text-[15px] text-[#14151C] placeholder-[#ACACB4] outline-none" />
-                    </div>
+                    <TextInput v-model="email" type="email" label="Email" placeholder="you@durianpay.id" required size="lg" />
+                    <TextInput v-model="password" type="password" label="Password" placeholder="••••••••" required size="lg" />
 
-                    <div v-if="errorMessage" class="rounded-lg bg-[#FDE8ED] px-3 py-2.5 text-[13px] text-[#B8123A]">
+                    <div v-if="errorMessage" class="rounded-lg bg-error-bg px-3 py-2.5 text-[13px] text-error-text">
                         {{ errorMessage }}
                     </div>
 
-                    <button type="submit" :disabled="isSigningIn"
-                        class="mt-1 cursor-pointer rounded-[10px] border-none bg-[#E31C4D] p-[13px] font-sans text-[15px] font-semibold text-white transition-colors hover:bg-[#B8123A] disabled:cursor-not-allowed disabled:opacity-70">
-                        {{ isSigningIn ? 'Signing in…' : 'Sign in' }}
-                    </button>
+                    <Button type="submit" :loading="isSigningIn" loading-text="Signing in…" class="mt-1">
+                        Sign in
+                    </Button>
                 </form>
             </div>
         </div>

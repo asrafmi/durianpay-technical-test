@@ -24,40 +24,40 @@ const pageNumbers = computed(() => {
 
 </script>
 <template>
-    <div class="flex items-center justify-between border-t border-[#E5E5EA] px-6 py-4">
-        <div class="text-[13px] text-[#6B6B76]">1–{{ rows.length }} of {{ total }}</div>
+    <div class="flex items-center justify-between border-t border-border px-6 py-4">
+        <div class="text-[13px] text-text-muted">1–{{ rows.length }} of {{ total }}</div>
         <div class="flex items-center gap-1.5">
             <button type="button" :disabled="currentPage === 1"
-                class="flex cursor-pointer items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#E5E5EA]"
+                class="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border"
                 @click="goToPrevPage">
                 <span aria-hidden="true">‹</span> Back
             </button>
 
             <button v-if="pageNumbers[0] > 1" type="button"
-                class="h-8 w-8 cursor-pointer rounded-lg border border-[#E5E5EA] bg-white font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA]"
+                class="h-8 w-8 cursor-pointer rounded-lg border border-border bg-white font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover"
                 @click="goToPage(1)">
                 1
             </button>
-            <span v-if="pageNumbers[0] > 2" class="px-1 text-[13px] text-[#6B6B76]">…</span>
+            <span v-if="pageNumbers[0] > 2" class="px-1 text-[13px] text-text-muted">…</span>
 
             <button v-for="page in pageNumbers" :key="page" type="button"
                 class="h-8 w-8 cursor-pointer rounded-lg font-sans text-[13px] font-semibold transition-colors" :class="page === currentPage
-                    ? 'bg-[#14151C] text-white'
-                    : 'border border-[#E5E5EA] bg-white text-[#14151C] hover:border-[#B0B0BA]'"
+                    ? 'bg-text-primary text-white'
+                    : 'border border-border bg-white text-text-primary hover:border-border-hover'"
                 @click="goToPage(page)">
                 {{ page }}
             </button>
 
             <span v-if="pageNumbers[pageNumbers.length - 1] < totalPages - 1"
-                class="px-1 text-[13px] text-[#6B6B76]">…</span>
+                class="px-1 text-[13px] text-text-muted">…</span>
             <button v-if="pageNumbers[pageNumbers.length - 1] < totalPages" type="button"
-                class="h-8 w-8 cursor-pointer rounded-lg border border-[#E5E5EA] bg-white font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA]"
+                class="h-8 w-8 cursor-pointer rounded-lg border border-border bg-white font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover"
                 @click="goToPage(totalPages)">
                 {{ totalPages }}
             </button>
 
             <button type="button" :disabled="currentPage === totalPages"
-                class="flex cursor-pointer items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#E5E5EA]"
+                class="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border"
                 @click="goToNextPage">
                 Next <span aria-hidden="true">›</span>
             </button>

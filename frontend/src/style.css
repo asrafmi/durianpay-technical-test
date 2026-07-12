@@ -2,6 +2,28 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', sans-serif;
+
+  --color-primary: #E31C4D;
+  --color-primary-dark: #B8123A;
+  --color-success: #1A9E5C;
+  --color-processing: #2563EB;
+  --color-error: #E31C4D;
+  --color-error-bg: #FDE8ED;
+  --color-error-text: #B8123A;
+  --color-border: #E5E5EA;
+  --color-border-hover: #B0B0BA;
+  --color-border-dark: #26272F;
+  --color-bg-light: #F0F0F3;
+  --color-bg-hover: #FAFAFB;
+  --color-bg-page: #F6F6F8;
+  --color-bg-dark: #14151C;
+  --color-text-muted: #6B6B76;
+  --color-text-primary: #14151C;
+  --color-text-secondary: #9A9AA6;
+  --color-text-tertiary: #5A5B66;
+  --color-text-label: #3A3B45;
+  --color-text-placeholder: #ACACB4;
+  --color-text-divider: #C7C7D1;
 }
 
 body {
