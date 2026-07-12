@@ -84,6 +84,7 @@ export function formatCurrency(n: number): string {
   return 'Rp' + n.toLocaleString('id-ID')
 }
 
-export function formatDate(d: Date): string {
-  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+export function formatDate(d: string): string {
+  const date = new Date(d)
+  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 }

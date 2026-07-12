@@ -35,21 +35,28 @@ export const useAuthStore = defineStore('auth', () => {
   const stored = loadStoredAuth()
   const user = ref<AuthUser | null>(stored?.user ?? null)
   const token = ref<string | null>(stored?.token ?? null)
+  const isLoading = ref<boolean>(false)
+  const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
 
   async function login(email: string, password: string) {
-    const [error, data] = await awaitToError(api.post<LoginResponse>('/dashboard/v1/auth/login', {
+    isLoading.value = true
+
+    const [err, data] = await awaitToError(api.post<LoginResponse>('/dashboard/v1/auth/login', {
       email,
       password,
     }))
-    if (error) {
-      throw error
+    if (err) {
+      isLoading.value = false
+      error.value = err.message
+      throw err
     }
     
     user.value = { email: data.data.email, role: data.data.role }
     token.value = data.data.token
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: user.value, token: data.data.token }))
+    isLoading.value = false
   }
 
   function logout() {
@@ -58,5 +65,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
-  return { user, token, isAuthenticated, login, logout }
+  return { user, token, isAuthenticated, isLoading, error, login, logout }
 })
