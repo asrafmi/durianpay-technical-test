@@ -38,12 +38,12 @@ func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 }
 
 func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params openapigen.GetDashboardV1PaymentsParams) {
-	var status, merchant, sort string
+	var status, search, sort string
 	if params.Status != nil {
 		status = *params.Status
 	}
 	if params.Search != nil {
-		merchant = *params.Search
+		search = *params.Search
 	}
 	if params.Sort != nil {
 		sort = *params.Sort
@@ -57,7 +57,7 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		limit = *params.Limit
 	}
 
-	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, merchant, page, limit, sort)
+	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, search, page, limit, sort)
 	if err != nil {
 		transport.WriteError(w, err)
 		return

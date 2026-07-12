@@ -12,16 +12,16 @@ type fakePaymentRepo struct {
 	total    int
 	err      error
 
-	gotStatus   entity.PaymentStatus
-	gotMerchant string
-	gotPage     int
-	gotLimit    int
-	gotSort     string
+	gotStatus entity.PaymentStatus
+	gotSearch string
+	gotPage   int
+	gotLimit  int
+	gotSort   string
 }
 
-func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, merchant string, page, limit int, sort string) ([]entity.Payment, error) {
+func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search string, page, limit int, sort string) ([]entity.Payment, error) {
 	f.gotStatus = status
-	f.gotMerchant = merchant
+	f.gotSearch = search
 	f.gotPage = page
 	f.gotLimit = limit
 	f.gotSort = sort
@@ -31,7 +31,7 @@ func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, merchant 
 	return f.payments, nil
 }
 
-func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, merchant string) (int, error) {
+func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, search string) (int, error) {
 	if f.err != nil {
 		return 0, f.err
 	}
@@ -123,8 +123,8 @@ func TestPayment_GetListPayments_PassesFiltersThrough(t *testing.T) {
 	if repo.gotStatus != entity.PaymentStatusCompleted {
 		t.Errorf("status = %q, want %q", repo.gotStatus, entity.PaymentStatusCompleted)
 	}
-	if repo.gotMerchant != "toko" {
-		t.Errorf("merchant = %q, want %q", repo.gotMerchant, "toko")
+	if repo.gotSearch != "toko" {
+		t.Errorf("search = %q, want %q", repo.gotSearch, "toko")
 	}
 }
 

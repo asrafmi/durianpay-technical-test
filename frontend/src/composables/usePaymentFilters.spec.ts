@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { defineComponent, nextTick } from 'vue'
@@ -43,7 +43,8 @@ describe('usePaymentFilters', () => {
     expect(store.fetchPaymentSummary).toHaveBeenCalledTimes(1)
   })
 
-  it('refetches payments when searchQuery changes', async () => {
+  it('refetches payments when searchQuery changes, after the debounce delay', async () => {
+    vi.useFakeTimers()
     const { filters } = mountFilters()
     const store = usePaymentStore()
     await nextTick()
@@ -51,10 +52,24 @@ describe('usePaymentFilters', () => {
 
     filters.searchQuery.value = 'acme'
     await nextTick()
+    expect(store.fetchPayments).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(400)
     expect(store.fetchPayments).toHaveBeenCalledTimes(2)
     expect(store.fetchPayments).toHaveBeenLastCalledWith(
       expect.objectContaining({ search: 'acme', page: 1 }),
     )
+    vi.useRealTimers()
+  })
+
+  it('resets currentPage to 1 immediately when searchQuery changes (before debounce fires)', async () => {
+    const { filters } = mountFilters()
+    filters.currentPage.value = 3
+
+    filters.searchQuery.value = 'acme'
+    await nextTick()
+
+    expect(filters.currentPage.value).toBe(1)
   })
 
   it('handleStatusChange updates status and resets currentPage to 1', () => {
