@@ -10,6 +10,7 @@ const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payme
 
 const pageSize = 10
 const searchQuery = ref<string>('')
+const status = ref<string>(PaymentStatus.ALL)
 const currentPage = ref<number>(1)
 const paymentStore = usePaymentStore()
 
@@ -19,6 +20,7 @@ watchEffect(() => {
             search: searchQuery.value,
             page: currentPage.value,
             limit: pageSize,
+            status: status.value,
         })
     }
 
@@ -28,15 +30,20 @@ watchEffect(() => {
 const payments = computed(() => paymentStore.payments)
 const total = computed(() => payments.value.length)
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
-const pct = (n: number) => (total.value ? Math.round((n / total.value) * 100) : 0)
 const rows = computed(() => payments.value.map((p) => ({
     ...p,
     meta: STATUS_META[p.status as keyof typeof STATUS_META]
 })))
+const pct = (n: number) => (total.value ? Math.round((n / total.value) * 100) : 0)
 
 const completed = computed(() => payments.value.filter((p) => p.status === PaymentStatus.COMPLETED).length)
 const processing = computed(() => payments.value.filter((p) => p.status === PaymentStatus.PROCESSING).length)
 const failed = computed(() => payments.value.filter((p) => p.status === PaymentStatus.FAILED).length)
+
+const handleStatusChange = (newStatus: PaymentStatus) => {
+    status.value = newStatus
+    currentPage.value = 1
+}
 
 </script>
 
@@ -82,24 +89,25 @@ const failed = computed(() => payments.value.filter((p) => p.status === PaymentS
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-            <input type="text" placeholder="Search merchant or payment ID…"
+            <label for="search-field" class="sr-only">Search</label>
+            <input id="search-field" v-model="searchQuery" type="text" placeholder="Search merchant or payment ID…"
                 class="min-w-[220px] flex-1 rounded-[9px] border border-[#E5E5EA] bg-white px-3.5 py-2.5 font-sans text-sm text-[#14151C] placeholder-[#ACACB4] outline-none" />
 
             <div class="flex gap-0.5 rounded-[9px] bg-[#EFEFF2] p-[3px]">
-                <button type="button"
-                    class="cursor-pointer rounded-[7px] border-none bg-white px-3.5 py-2 font-sans text-[13px] font-semibold text-[#14151C]">
+                <button @click="handleStatusChange(PaymentStatus.ALL)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.ALL ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     All
                 </button>
-                <button type="button"
-                    class="cursor-pointer rounded-[7px] border-none bg-transparent px-3.5 py-2 font-sans text-[13px] font-semibold text-[#6B6B76]">
+                <button @click="handleStatusChange(PaymentStatus.COMPLETED)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.COMPLETED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     Completed
                 </button>
-                <button type="button"
-                    class="cursor-pointer rounded-[7px] border-none bg-transparent px-3.5 py-2 font-sans text-[13px] font-semibold text-[#6B6B76]">
+                <button @click="handleStatusChange(PaymentStatus.PROCESSING)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.PROCESSING ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     Processing
                 </button>
-                <button type="button"
-                    class="cursor-pointer rounded-[7px] border-none bg-transparent px-3.5 py-2 font-sans text-[13px] font-semibold text-[#6B6B76]">
+                <button @click="handleStatusChange(PaymentStatus.FAILED)" type="button"
+                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === PaymentStatus.FAILED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
                     Failed
                 </button>
             </div>
