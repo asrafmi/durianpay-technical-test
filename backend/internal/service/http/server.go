@@ -14,6 +14,7 @@ import (
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/golang-jwt/jwt/v5"
 	oapinethttpmw "github.com/oapi-codegen/nethttp-middleware"
 )
@@ -40,6 +41,11 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 
 	r := chi.NewRouter()
 
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+	}))
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
 		http.ServeFile(w, req, openapiYamlPath)
 	})
