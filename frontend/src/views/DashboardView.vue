@@ -4,7 +4,7 @@ import { formatCurrency, formatDate, STATUS_META } from '../data/payments'
 import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore } from '../stores/payment.ts'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch, watchEffect } from 'vue'
 
 const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
 
@@ -44,6 +44,28 @@ const handleStatusChange = (newStatus: StatusFilter) => {
     status.value = newStatus
     currentPage.value = 1
 }
+
+const statusFilters = [
+    { label: 'All', value: StatusFilter.ALL },
+    { label: 'Completed', value: StatusFilter.COMPLETED },
+    { label: 'Processing', value: StatusFilter.PROCESSING },
+    { label: 'Failed', value: StatusFilter.FAILED },
+]
+
+const filterRefs = useTemplateRef<HTMLElement[]>('filterItems')
+const pillLeft = ref(0)
+const pillWidth = ref(0)
+
+function updatePill() {
+    const activeIndex = statusFilters.findIndex((item) => item.value === status.value)
+    const el = filterRefs.value?.[activeIndex]
+    if (el) {
+        pillLeft.value = el.offsetLeft
+        pillWidth.value = el.offsetWidth
+    }
+}
+
+watch(status, () => nextTick(updatePill), { immediate: true, flush: 'post' })
 
 </script>
 
@@ -93,22 +115,21 @@ const handleStatusChange = (newStatus: StatusFilter) => {
             <input id="search-field" v-model="searchQuery" type="text" placeholder="Search merchant or payment ID…"
                 class="min-w-[220px] flex-1 rounded-[9px] border border-[#E5E5EA] bg-white px-3.5 py-2.5 font-sans text-sm text-[#14151C] placeholder-[#ACACB4] outline-none" />
 
-            <div class="flex gap-0.5 rounded-[9px] bg-[#EFEFF2] p-[3px]">
-                <button @click="handleStatusChange(StatusFilter.ALL)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.ALL ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
-                    All
-                </button>
-                <button @click="handleStatusChange(StatusFilter.COMPLETED)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.COMPLETED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
-                    Completed
-                </button>
-                <button @click="handleStatusChange(StatusFilter.PROCESSING)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.PROCESSING ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
-                    Processing
-                </button>
-                <button @click="handleStatusChange(StatusFilter.FAILED)" type="button"
-                    :class="['cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold', status === StatusFilter.FAILED ? 'bg-white text-[#14151C]' : 'bg-transparent text-[#6B6B76]']">
-                    Failed
+            <div class="relative flex gap-0.5 rounded-[9px] bg-[#EFEFF2] p-0.75">
+                <span
+                    class="absolute top-0.75 bottom-0.75 rounded-[7px] bg-white shadow-sm transition-[left,width] duration-300 ease-out"
+                    :style="{ left: pillLeft + 'px', width: pillWidth + 'px' }"
+                />
+                <button
+                    v-for="item in statusFilters"
+                    :key="item.value"
+                    ref="filterItems"
+                    type="button"
+                    class="relative cursor-pointer rounded-[7px] border-none px-3.5 py-2 font-sans text-[13px] font-semibold transition-colors"
+                    :class="status === item.value ? 'text-[#14151C]' : 'text-[#6B6B76]'"
+                    @click="handleStatusChange(item.value)"
+                >
+                    {{ item.label }}
                 </button>
             </div>
 
