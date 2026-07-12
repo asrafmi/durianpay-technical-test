@@ -3,3 +3,5 @@
 data/dashboard.db
 
 node_modules/
+
+.vscode/
