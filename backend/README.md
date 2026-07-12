@@ -91,11 +91,13 @@ go test ./...
 go test ./... -cover
 ```
 
-**Strategy:** unit tests focus on the usecase layer, since that is where the critical business logic lives (JWT issuance/verification, credential checks, pagination normalization, filter pass-through). Usecases depend on their repositories through interfaces (`UserRepository`, `PaymentRepository`), so tests use small hand-written fakes instead of a real database or a mocking library - no test doubles beyond a plain struct implementing the interface are needed.
+**Strategy:** unit tests focus on the usecase layer, since that is where the critical business logic lives (JWT issuance/verification, credential checks, pagination normalization, filter pass-through, date-range/timezone handling). Usecases depend on their repositories through interfaces (`UserRepository`, `PaymentRepository`), so tests use small hand-written fakes instead of a real database or a mocking library - no test doubles beyond a plain struct implementing the interface are needed.
 
-Handlers and repositories are not unit-tested here: handlers are thin adapters with little logic of their own, and repositories are mostly SQL - testing them meaningfully would require a real database (integration tests), which is out of scope for this pass.
+`payment/repository` is the one repository with a unit test, covering the SQL query-building logic for filters (status, search, date range) against an in-memory SQLite instance, since a subtle mistake there (e.g. an off-by-one in a date boundary) would silently return wrong data rather than error.
 
-Current coverage: `auth/usecase` ~88%, `payment/usecase` ~89%, `pkg/pagination` 100%.
+Handlers are not unit-tested here: they are thin adapters with little logic of their own beyond binding requests and calling the usecase.
+
+Current coverage: `auth/usecase` ~87.5%, `payment/usecase` ~84.6%, `payment/repository` ~61.1%, `pkg/pagination` 100%.
 
 ## API documentation
 
