@@ -23,7 +23,7 @@ func (r *User) GetUserByEmail(email string) (*entity.User, error) {
 	var u entity.User
 	if err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.Role); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, entity.ErrorNotFound("user not found")
+			return &entity.User{}, nil
 		}
 		return nil, entity.WrapError(err, entity.ErrorCodeInternal, "db error")
 	}

@@ -9,6 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	errorMessageInvalidCredentials = "invalid credentials"
+	errorMessageInvalidToken       = "invalid token"
+)
+
 type AuthUsecase interface {
 	Login(email string, password string) (string, *entity.User, error)
 }
@@ -30,10 +35,10 @@ func (a *Auth) Login(email string, password string) (string, *entity.User, error
 		return "", nil, err
 	}
 	if user.ID == "" {
-		return "", nil, entity.ErrorNotFound("user not found")
+		return "", nil, entity.ErrorNotFound(errorMessageInvalidCredentials)
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, "invalid credentials")
+		return "", nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, errorMessageInvalidCredentials)
 	}
 
 	claims := jwt.MapClaims{
@@ -44,7 +49,7 @@ func (a *Auth) Login(email string, password string) (string, *entity.User, error
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := token.SignedString(a.jwtSecret)
 	if err != nil {
-		return "", nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, "invalid credentials")
+		return "", nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, errorMessageInvalidCredentials)
 	}
 	return signed, user, nil
 }
@@ -54,10 +59,10 @@ func (a *Auth) VerifyToken(tokenStr string) (jwt.MapClaims, error) {
 		return a.jwtSecret, nil
 	})
 	if err != nil {
-		return nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, "invalid token")
+		return nil, entity.WrapError(err, entity.ErrorCodeUnauthorized, errorMessageInvalidToken)
 	}
 	if !token.Valid {
-		return nil, entity.ErrorUnauthorized("invalid token")
+		return nil, entity.ErrorUnauthorized(errorMessageInvalidToken)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
