@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { computed, nextTick, ref, useTemplateRef, watch, watchEffect } from 'vue'
+
+import Pagination from '../components/Pagination.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
+
 import { formatCurrency, formatDate, STATUS_META } from '../data/payments'
 import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore } from '../stores/payment.ts'
-import { computed, nextTick, ref, useTemplateRef, watch, watchEffect } from 'vue'
 
 const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
 
@@ -29,7 +32,7 @@ watchEffect(() => {
 
 const payments = computed(() => paymentStore.payments)
 const total = computed(() => payments.value.length)
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
+const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize)))
 const rows = computed(() => payments.value.map((p) => ({
     ...p,
     meta: STATUS_META[p.status as keyof typeof STATUS_META]
@@ -67,6 +70,17 @@ function updatePill() {
 
 watch(status, () => nextTick(updatePill), { immediate: true, flush: 'post' })
 
+function goToPage(page: number) {
+    currentPage.value = Math.min(Math.max(1, page), totalPages.value)
+}
+
+function goToPrevPage() {
+    goToPage(currentPage.value - 1)
+}
+
+function goToNextPage() {
+    goToPage(currentPage.value + 1)
+}
 </script>
 
 <template>
@@ -132,11 +146,6 @@ watch(status, () => nextTick(updatePill), { immediate: true, flush: 'post' })
                     {{ item.label }}
                 </button>
             </div>
-
-            <button type="button"
-                class="cursor-pointer rounded-[9px] border border-[#E5E5EA] bg-white px-4 py-2.5 font-sans text-[13px] font-semibold text-[#14151C] transition-colors hover:border-[#B0B0BA]">
-                Export CSV
-            </button>
         </div>
 
         <div class="overflow-hidden rounded-[14px] border border-[#E5E5EA] bg-white">
@@ -188,20 +197,15 @@ watch(status, () => nextTick(updatePill), { immediate: true, flush: 'post' })
                 </table>
             </div>
 
-            <div class="flex items-center justify-between border-t border-[#E5E5EA] px-6 py-4">
-                <div class="text-[13px] text-[#6B6B76]">1–{{ rows.length }} of {{ total }}</div>
-                <div class="flex items-center gap-2.5">
-                    <button type="button"
-                        class="cursor-pointer rounded-lg border border-[#E5E5EA] bg-white px-3.5 py-[7px] font-sans text-[13px] font-semibold text-[#14151C]">
-                        Prev
-                    </button>
-                    <div class="text-[13px] text-[#6B6B76]">Page 1 of {{ totalPages }}</div>
-                    <button type="button"
-                        class="cursor-pointer rounded-lg border border-[#E5E5EA] bg-white px-3.5 py-[7px] font-sans text-[13px] font-semibold text-[#14151C]">
-                        Next
-                    </button>
-                </div>
-            </div>
+            <Pagination
+                :rows="rows"
+                :total="paymentStore.total"
+                :currentPage="currentPage"
+                :pageSize="pageSize"
+                :goToPage="goToPage"
+                :goToPrevPage="goToPrevPage"
+                :goToNextPage="goToNextPage"
+            />
         </div>
     </div>
 </template>

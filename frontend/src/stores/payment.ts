@@ -15,6 +15,9 @@ interface Payment {
 
 interface PaymentListResponse {
   payments: Payment[]
+  total: number
+  page: number
+  limit: number
 }
 
 interface GetDashboardV1PaymentsParams {
@@ -26,6 +29,7 @@ interface GetDashboardV1PaymentsParams {
 
 export const usePaymentStore = defineStore('payment', () => {
   const payments = ref<Payment[]>([])
+  const total = ref<number>(0)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
@@ -47,11 +51,13 @@ export const usePaymentStore = defineStore('payment', () => {
     }
 
     payments.value = data.data.payments
+    total.value = data.data.total
     isLoading.value = false
   }
 
   return {
     payments,
+    total,
     isLoading,
     error,
     fetchPayments,
