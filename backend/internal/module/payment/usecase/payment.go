@@ -8,6 +8,7 @@ import (
 
 type PaymentUsecase interface {
 	GetListPayments(status, merchant string, page, limit int) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
+	GetPaymentSummary() (*entity.PaymentSummary, error)
 }
 
 type Payment struct {
@@ -32,4 +33,13 @@ func (p *Payment) GetListPayments(status, merchant string, page, limit int) ([]e
 	}
 
 	return payments, total, page, limit, nil
+}
+
+func (p *Payment) GetPaymentSummary() (*entity.PaymentSummary, error) {
+	summary, err := p.repo.GetPaymentsSummary()
+	if err != nil {
+		return nil, err
+	}
+
+	return &summary, nil
 }

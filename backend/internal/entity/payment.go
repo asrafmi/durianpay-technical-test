@@ -8,6 +8,13 @@ type Payment struct {
 	CreatedAt string        `json:"created_at"`
 }
 
+type PaymentSummary struct {
+	Total      int `json:"total"`
+	Success    int `json:"success"`
+	Failed     int `json:"failed"`
+	Processing int `json:"processing"`
+}
+
 type PaymentStatus string
 
 const (

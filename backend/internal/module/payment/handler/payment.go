@@ -81,3 +81,22 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		return
 	}
 }
+
+func (p *PaymentHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+	summary, err := p.paymentUC.GetPaymentSummary()
+	if err != nil {
+		transport.WriteError(w, err)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(openapigen.PaymentSummaryResponse{
+		Total:      &summary.Total,
+		Success:    &summary.Success,
+		Failed:     &summary.Failed,
+		Processing: &summary.Processing,
+	})
+	if err != nil {
+		transport.WriteAppError(w, entity.ErrorInternal("internal server error"))
+		return
+	}
+}

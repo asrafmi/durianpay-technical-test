@@ -61,6 +61,14 @@ type PaymentListResponse struct {
 	Total    *int       `json:"total,omitempty"`
 }
 
+// PaymentSummaryResponse defines model for PaymentSummaryResponse.
+type PaymentSummaryResponse struct {
+	Failed     *int `json:"failed,omitempty"`
+	Processing *int `json:"processing,omitempty"`
+	Success    *int `json:"success,omitempty"`
+	Total      *int `json:"total,omitempty"`
+}
+
 // UnauthorizedError defines model for UnauthorizedError.
 type UnauthorizedError = Error
 
@@ -105,6 +113,9 @@ type ServerInterface interface {
 	// List of payments
 	// (GET /dashboard/v1/payments)
 	GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params GetDashboardV1PaymentsParams)
+	// Get payment summary
+	// (GET /dashboard/v1/payments/summary)
+	GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -120,6 +131,12 @@ func (_ Unimplemented) PostDashboardV1AuthLogin(w http.ResponseWriter, r *http.R
 // List of payments
 // (GET /dashboard/v1/payments)
 func (_ Unimplemented) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params GetDashboardV1PaymentsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get payment summary
+// (GET /dashboard/v1/payments/summary)
+func (_ Unimplemented) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -250,6 +267,26 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 	handler.ServeHTTP(w, r)
 }
 
+// GetDashboardV1PaymentsSummary operation middleware
+func (siw *ServerInterfaceWrapper) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDashboardV1PaymentsSummary(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -369,6 +406,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/dashboard/v1/payments", wrapper.GetDashboardV1Payments)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/dashboard/v1/payments/summary", wrapper.GetDashboardV1PaymentsSummary)
+	})
 
 	return r
 }
@@ -378,23 +418,24 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"pFbfb9s2EP5XCG4PDaZYctuHQsAesnUbOrRAsK3bQxbMtHi22Ymkejyl8QL/78ORsi1ZMpK2T4bF4333",
-	"ffeD9yArbxvvwFGQ5YNsFCoLBBj/BY/EvxpChaYh450s5Y/eWnUZgG0JtGArsTJQ6zATfOidaBQRoAul",
-	"WFxWCGz3j6KFeNYgrMy9WFwuxPeC/V6IhbK+dXzovBicq1Bd/O1kJg3jfmwBtzKTTlmQZQouk6HagFUc",
-	"Jdwr29R81IOUmaRtE+0JjVvL3W6XSYTQeBcgsnzr18b91n3hD5V3BC4yV01Tm0ox8/xDYPoPPcRvEVay",
-	"lN/kRxHzdBry9wEwgQ3VQ6AWnSD/LzihnBZtABTGrTzaiCN3mbxWWwuO3ppAXxRYg74BJJMI1sYaGig0",
-	"Lw6yGEew5lAz2ag1DM2mrWJs0bMhsOExJToyfLfzphDVNv73pOoB5MvnY8zjRb/8ABVNydqBCJaMPb93",
-	"qqWNR/Mf6J8QPT5Bvy6ISKiN98ERG4GO8rbWKtzKUr4zIRi3Fp4Td6dqo1M+ZSbvVN12udJMp5hn0kII",
-	"UdouqoPXUthzniLFp1VaojehydURy3gnVsrUoBlqj1ohaDZQdZBHvMj/oNmwlBKrfr6KySI5UO635dPZ",
-	"j5uWe/Zja5BTcZPCOKLcjgrk0EJjCmnaDCObF8WsKMawmexNkvJBpiaVpdSK4JKMhak7Rp94nzKygNVG",
-	"nQbyrvsqrqbuBFLUhuENLogaeA5nokFfQZI0Y1FTxifVHOkV59VILLDKxAYdxYK+hsmDlMHxyUQXZzJA",
-	"1aKh7e9ceQlyCQoBuXaP/37e6/7rX3/sZz57SqdHghuiJnUCD9QYhKEo0+sWjXLXaiteq7BZeoVaXF2/",
-	"4Y4FDKlf5rNiVjAF34BTjZGlfDErZi8kDz3axOhyvb+e381zrue85vcjSudDTCcLGFvujebJ5AMdMP+c",
-	"M7H44shU0hDoB6+3XzHez+eoUSF88qins9FvqOSjd+N2cuYerxC2cPqQPi+Kc7PqYJcPX9tdJl8W88dv",
-	"jcd5rJ7DRI5exSdDGxGpiO/EgQpbDtPWf8LWMJGzX6Cfsuu9eTbYj26mgz6a5HFF2WWnC1RqY+FXogtE",
-	"PHu8iy/OrUFpJvQfi1GqTwPYwxp9xmk8+AyHARRWmz2dIJZbsZ9vIro8E3u89rmxr0G41i4BxbP5pXEa",
-	"7s+rE1eavn8NK9XWFHcba5yxrZ3cc8bAHaZfibj1iAZQdO6nkNPSNQ1dZNKq+w67KB6J5PZL2mxqg/zK",
-	"ZutGdSz8/pC+ueUQe71oAvWKO3S7DODdvm1arLthXeZ57StVb3yg8lXxqpC7293/AQAA//8=",
+	"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",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

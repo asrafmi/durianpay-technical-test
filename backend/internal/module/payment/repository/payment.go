@@ -13,6 +13,7 @@ const errDB = "db error"
 type PaymentRepository interface {
 	GetListPayments(status entity.PaymentStatus, merchant string, page, limit int) ([]entity.Payment, error)
 	CountPayments(status entity.PaymentStatus, merchant string) (int, error)
+	GetPaymentsSummary() (entity.PaymentSummary, error)
 }
 
 type PaymentRepo struct {
@@ -78,4 +79,23 @@ func (r *PaymentRepo) CountPayments(status entity.PaymentStatus, merchant string
 		return 0, entity.WrapError(err, entity.ErrorCodeInternal, errDB)
 	}
 	return count, nil
+}
+
+func (r *PaymentRepo) GetPaymentsSummary() (entity.PaymentSummary, error) {
+	var summary entity.PaymentSummary
+	query := `
+		SELECT 
+			COUNT(1) AS total,
+			SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS success,
+			SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed,
+			SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) AS processing
+		FROM payments
+	`
+
+	err := r.db.QueryRow(query).Scan(&summary.Total, &summary.Success, &summary.Failed, &summary.Processing)
+	if err != nil {
+		return entity.PaymentSummary{}, entity.WrapError(err, entity.ErrorCodeInternal, errDB)
+	}
+
+	return summary, nil
 }

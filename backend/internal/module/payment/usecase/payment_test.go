@@ -36,6 +36,41 @@ func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, merchant st
 	return f.total, nil
 }
 
+func (f *fakePaymentRepo) GetPaymentsSummary() (entity.PaymentSummary, error) {
+	if f.err != nil {
+		return entity.PaymentSummary{}, f.err
+	}
+	return entity.PaymentSummary{
+		Total:      100,
+		Success:    70,
+		Failed:     20,
+		Processing: 10,
+	}, nil
+}
+
+func TestPayment_GetPaymentSummary_ReturnsSummary(t *testing.T) {
+	repo := &fakePaymentRepo{}
+	uc := NewPaymentUsecase(repo)
+
+	summary, err := uc.GetPaymentSummary()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if summary.Total != 100 {
+		t.Errorf("Total = %d, want 100", summary.Total)
+	}
+	if summary.Success != 70 {
+		t.Errorf("Success = %d, want 70", summary.Success)
+	}
+	if summary.Failed != 20 {
+		t.Errorf("Failed = %d, want 20", summary.Failed)
+	}
+	if summary.Processing != 10 {
+		t.Errorf("Processing = %d, want 10", summary.Processing)
+	}
+}
+
 func TestPayment_GetListPayments_NormalizesPagination(t *testing.T) {
 	tests := []struct {
 		name      string
