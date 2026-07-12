@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatCurrency, formatDate, percentageOf } from './payments'
+import { formatCurrency, formatDate, percentageOf } from './payment-format'
 
 describe('formatCurrency', () => {
   it('formats a whole number with the Rp prefix and thousands separator', () => {

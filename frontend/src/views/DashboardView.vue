@@ -10,7 +10,7 @@ import TextInput from '../components/TextInput.vue'
 import SummaryCard from '../components/SummaryCard.vue'
 import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 
-import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../data/payments'
+import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
 import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore, type Payment } from '../stores/payment.ts'
@@ -79,6 +79,10 @@ function handleClosePanel() {
             <Breadcrumb :items="breadcrumbItems" />
             <div class="mt-2 text-2xl font-bold tracking-tight">Payments</div>
             <div class="mt-0.5 text-sm text-text-muted">Monitor and manage incoming payments.</div>
+        </div>
+
+        <div v-if="paymentStore.error" class="rounded-lg bg-error-bg px-3.5 py-2.5 text-[13px] text-error-text">
+            {{ paymentStore.error }}
         </div>
 
         <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">

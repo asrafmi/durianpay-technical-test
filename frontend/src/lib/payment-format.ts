@@ -1,14 +1,5 @@
 import { PaymentStatus } from '../constants/payment-status'
 
-export interface Payment {
-  id: string
-  merchant: string
-  method: string
-  amount: number
-  date: Date
-  status: PaymentStatus
-}
-
 export const STATUS_META: Record<PaymentStatus, { label: string; color: string; bg: string }> = {
   [PaymentStatus.COMPLETED]: { label: 'Completed', color: '#1A9E5C', bg: '#E7F7EF' },
   [PaymentStatus.PROCESSING]: { label: 'Processing', color: '#2563EB', bg: '#EAF1FE' },

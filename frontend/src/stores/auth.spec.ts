@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { AxiosError, AxiosHeaders } from 'axios'
 import { UserRole } from '../constants/user-role'
 import { AUTH_STORAGE_KEY } from '../constants/storage'
 import { api } from '../lib/api'
@@ -9,6 +10,16 @@ vi.mock('../lib/api', () => ({
 }))
 
 const mockedPost = api.post as unknown as ReturnType<typeof vi.fn>
+
+function makeApiError(code: string) {
+  return new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
+    status: 401,
+    statusText: 'Error',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+    data: { code },
+  })
+}
 
 describe('useAuthStore', () => {
   beforeEach(() => {
@@ -69,16 +80,26 @@ describe('useAuthStore', () => {
       expect(persisted.token).toBe('new-token')
     })
 
-    it('sets error, resets loading, and throws on failure', async () => {
-      mockedPost.mockRejectedValueOnce(new Error('invalid credentials'))
+    it('sets a human-readable error, resets loading, and throws on failure', async () => {
+      mockedPost.mockRejectedValueOnce(makeApiError('not_found'))
 
       const { useAuthStore } = await import('./auth')
       const store = useAuthStore()
 
-      await expect(store.login('a@b.com', 'wrong')).rejects.toThrow('invalid credentials')
-      expect(store.error).toBe('invalid credentials')
+      await expect(store.login('a@b.com', 'wrong')).rejects.toThrow()
+      expect(store.error).toBe('Email atau password salah.')
       expect(store.isLoading).toBe(false)
       expect(store.isAuthenticated).toBe(false)
+    })
+
+    it('maps an unauthorized failure to the same login-specific message', async () => {
+      mockedPost.mockRejectedValueOnce(makeApiError('unauthorized'))
+
+      const { useAuthStore } = await import('./auth')
+      const store = useAuthStore()
+
+      await expect(store.login('a@b.com', 'wrong')).rejects.toThrow()
+      expect(store.error).toBe('Email atau password salah.')
     })
   })
 

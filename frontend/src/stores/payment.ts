@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
 import omitEmpty from '../lib/omit-empty'
+import { getErrorMessage } from '../lib/error-message'
 
 export interface Payment {
   id: string
@@ -56,7 +57,7 @@ export const usePaymentStore = defineStore('payment', () => {
       params,
     }))
     if (err) {
-      error.value = err.message
+      error.value = getErrorMessage(err)
       isLoadingPaymentList.value = false
       return
     }
@@ -70,13 +71,12 @@ export const usePaymentStore = defineStore('payment', () => {
     isLoadingPaymentSummary.value = true
     const [err, data] = await awaitToError(api.get('/dashboard/v1/payments/summary'))
     if (err) {
-      error.value = err.message
+      error.value = getErrorMessage(err)
       isLoadingPaymentSummary.value = false
       return
     }
 
     const summaryData: PaymentSummaryResponse = data.data
-    console.log('summaryData', summaryData)
     summary.value = summaryData
     isLoadingPaymentSummary.value = false
   }

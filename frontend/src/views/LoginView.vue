@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { isAxiosError } from 'axios'
 import { useAuthStore } from '../stores/auth'
 import LottiePlayer from '../components/LottiePlayer.vue'
 import TextInput from '../components/TextInput.vue'
@@ -18,19 +17,12 @@ const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const isSigningIn = ref(false)
-const errorMessage = ref('')
 
 async function handleSubmit() {
     isSigningIn.value = true
-    errorMessage.value = ''
     const [err] = await awaitToError(authStore.login(email.value, password.value))
-    if (err) {
-        errorMessage.value = isAxiosError(err)
-            ? (err.response?.data?.message ?? 'Login gagal. Periksa email dan password Anda.')
-            : 'Terjadi kesalahan. Coba lagi.'
-        isSigningIn.value = false
-    } else {
-        isSigningIn.value = false
+    isSigningIn.value = false
+    if (!err) {
         const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ROUTE_DASHBOARD
         router.push(redirect)
     }
@@ -84,8 +76,8 @@ async function handleSubmit() {
                     <TextInput v-model="email" type="email" label="Email" placeholder="you@durianpay.id" required size="lg" />
                     <TextInput v-model="password" type="password" label="Password" placeholder="••••••••" required size="lg" />
 
-                    <div v-if="errorMessage" class="rounded-lg bg-error-bg px-3 py-2.5 text-[13px] text-error-text">
-                        {{ errorMessage }}
+                    <div v-if="authStore.error" class="rounded-lg bg-error-bg px-3 py-2.5 text-[13px] text-error-text">
+                        {{ authStore.error }}
                     </div>
 
                     <Button type="submit" :loading="isSigningIn" loading-text="Signing in…" class="mt-1">

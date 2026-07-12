@@ -1,7 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { AxiosError, AxiosHeaders } from 'axios'
 import { usePaymentStore } from './payment'
 import { api } from '../lib/api'
+
+function makeApiError(code: string) {
+  return new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
+    status: 500,
+    statusText: 'Error',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+    data: { code },
+  })
+}
 
 vi.mock('../lib/api', () => ({
   api: { get: vi.fn() },
@@ -48,13 +59,13 @@ describe('usePaymentStore', () => {
       )
     })
 
-    it('sets error and stops loading when the request fails', async () => {
-      mockedGet.mockRejectedValueOnce(new Error('network down'))
+    it('sets a human-readable error message and stops loading when the request fails', async () => {
+      mockedGet.mockRejectedValueOnce(makeApiError('internal_error'))
 
       const store = usePaymentStore()
       await store.fetchPayments({ page: 1 })
 
-      expect(store.error).toBe('network down')
+      expect(store.error).toBe('Terjadi kesalahan pada server. Silakan coba lagi.')
       expect(store.isLoadingPaymentList).toBe(false)
       expect(store.payments).toEqual([])
     })
@@ -85,13 +96,13 @@ describe('usePaymentStore', () => {
       expect(store.isLoadingPaymentSummary).toBe(false)
     })
 
-    it('sets error and stops loading when the request fails', async () => {
-      mockedGet.mockRejectedValueOnce(new Error('summary failed'))
+    it('sets a human-readable error message and stops loading when the request fails', async () => {
+      mockedGet.mockRejectedValueOnce(makeApiError('internal_error'))
 
       const store = usePaymentStore()
       await store.fetchPaymentSummary()
 
-      expect(store.error).toBe('summary failed')
+      expect(store.error).toBe('Terjadi kesalahan pada server. Silakan coba lagi.')
       expect(store.isLoadingPaymentSummary).toBe(false)
       expect(store.summary).toBeNull()
     })
