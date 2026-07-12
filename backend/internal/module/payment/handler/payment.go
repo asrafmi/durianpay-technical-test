@@ -49,6 +49,14 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		sort = *params.Sort
 	}
 
+	var dateFrom, dateTo *time.Time
+	if params.DateFrom != nil {
+		dateFrom = &params.DateFrom.Time
+	}
+	if params.DateTo != nil {
+		dateTo = &params.DateTo.Time
+	}
+
 	var page, limit int
 	if params.Page != nil {
 		page = *params.Page
@@ -57,7 +65,7 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		limit = *params.Limit
 	}
 
-	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, search, page, limit, sort)
+	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, search, dateFrom, dateTo, page, limit, sort)
 	if err != nil {
 		transport.WriteError(w, err)
 		return

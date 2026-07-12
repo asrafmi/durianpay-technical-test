@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/pagination"
@@ -12,8 +13,8 @@ import (
 const errDB = "db error"
 
 type PaymentRepository interface {
-	GetListPayments(status entity.PaymentStatus, search string, page, limit int, sort string) ([]entity.Payment, error)
-	CountPayments(status entity.PaymentStatus, search string) (int, error)
+	GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error)
+	CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error)
 	GetPaymentsSummary() (entity.PaymentSummary, error)
 }
 
@@ -25,7 +26,7 @@ func NewPaymentRepo(db *sql.DB) *PaymentRepo {
 	return &PaymentRepo{db: db}
 }
 
-func whereClause(status entity.PaymentStatus, search string) (string, []any) {
+func whereClause(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (string, []any) {
 	var conditions []string
 	var args []any
 
@@ -36,6 +37,14 @@ func whereClause(status entity.PaymentStatus, search string) (string, []any) {
 	if search != "" {
 		conditions = append(conditions, "(merchant LIKE ? OR CAST(id AS TEXT) LIKE ?)")
 		args = append(args, "%"+search+"%", "%"+search+"%")
+	}
+	if dateFrom != nil {
+		conditions = append(conditions, "created_at >= ?")
+		args = append(args, dateFrom.Format("2006-01-02 00:00:00"))
+	}
+	if dateTo != nil {
+		conditions = append(conditions, "created_at < ?")
+		args = append(args, dateTo.AddDate(0, 0, 1).Format("2006-01-02 00:00:00"))
 	}
 
 	if len(conditions) == 0 {
@@ -87,8 +96,8 @@ func parseSort(sort string) string {
 	return orderBy + strings.Join(orders, ", ")
 }
 
-func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, search string, page, limit int, sort string) ([]entity.Payment, error) {
-	where, args := whereClause(status, search)
+func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error) {
+	where, args := whereClause(status, search, dateFrom, dateTo)
 	orderBy := parseSort(sort)
 	query := "SELECT id, merchant, status, amount, created_at FROM payments" + where + orderBy + " LIMIT ? OFFSET ?"
 	args = append(args, limit, pagination.Offset(page, limit))
@@ -114,8 +123,8 @@ func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, search string
 	return payments, nil
 }
 
-func (r *PaymentRepo) CountPayments(status entity.PaymentStatus, search string) (int, error) {
-	where, args := whereClause(status, search)
+func (r *PaymentRepo) CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error) {
+	where, args := whereClause(status, search, dateFrom, dateTo)
 	query := "SELECT COUNT(1) FROM payments" + where
 
 	var count int

@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 )
@@ -12,16 +13,20 @@ type fakePaymentRepo struct {
 	total    int
 	err      error
 
-	gotStatus entity.PaymentStatus
-	gotSearch string
-	gotPage   int
-	gotLimit  int
-	gotSort   string
+	gotStatus   entity.PaymentStatus
+	gotSearch   string
+	gotDateFrom *time.Time
+	gotDateTo   *time.Time
+	gotPage     int
+	gotLimit    int
+	gotSort     string
 }
 
-func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search string, page, limit int, sort string) ([]entity.Payment, error) {
+func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error) {
 	f.gotStatus = status
 	f.gotSearch = search
+	f.gotDateFrom = dateFrom
+	f.gotDateTo = dateTo
 	f.gotPage = page
 	f.gotLimit = limit
 	f.gotSort = sort
@@ -31,7 +36,7 @@ func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search st
 	return f.payments, nil
 }
 
-func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, search string) (int, error) {
+func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error) {
 	if f.err != nil {
 		return 0, f.err
 	}
@@ -93,7 +98,7 @@ func TestPayment_GetListPayments_NormalizesPagination(t *testing.T) {
 			repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
 			uc := NewPaymentUsecase(repo)
 
-			_, _, gotPage, gotLimit, err := uc.GetListPayments("", "", tt.inPage, tt.inLimit, "")
+			_, _, gotPage, gotLimit, err := uc.GetListPayments("", "", nil, nil, tt.inPage, tt.inLimit, "")
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -115,7 +120,7 @@ func TestPayment_GetListPayments_PassesFiltersThrough(t *testing.T) {
 	repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
 	uc := NewPaymentUsecase(repo)
 
-	_, _, _, _, err := uc.GetListPayments("completed", "toko", 1, 10, "-created_at")
+	_, _, _, _, err := uc.GetListPayments("completed", "toko", nil, nil, 1, 10, "-created_at")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -128,6 +133,26 @@ func TestPayment_GetListPayments_PassesFiltersThrough(t *testing.T) {
 	}
 }
 
+func TestPayment_GetListPayments_PassesDateRangeThrough(t *testing.T) {
+	repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
+	uc := NewPaymentUsecase(repo)
+
+	dateFrom := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	dateTo := time.Date(2026, 1, 31, 0, 0, 0, 0, time.UTC)
+
+	_, _, _, _, err := uc.GetListPayments("", "", &dateFrom, &dateTo, 1, 10, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if repo.gotDateFrom == nil || !repo.gotDateFrom.Equal(dateFrom) {
+		t.Errorf("dateFrom = %v, want %v", repo.gotDateFrom, dateFrom)
+	}
+	if repo.gotDateTo == nil || !repo.gotDateTo.Equal(dateTo) {
+		t.Errorf("dateTo = %v, want %v", repo.gotDateTo, dateTo)
+	}
+}
+
 func TestPayment_GetListPayments_ReturnsPaymentsAndTotal(t *testing.T) {
 	want := []entity.Payment{
 		{ID: "1", Merchant: "Toko A", Status: entity.PaymentStatusCompleted, Amount: "100.00", CreatedAt: "2026-01-01T00:00:00Z"},
@@ -136,7 +161,7 @@ func TestPayment_GetListPayments_ReturnsPaymentsAndTotal(t *testing.T) {
 	repo := &fakePaymentRepo{payments: want, total: 42}
 	uc := NewPaymentUsecase(repo)
 
-	got, total, _, _, err := uc.GetListPayments("", "", 1, 10, "")
+	got, total, _, _, err := uc.GetListPayments("", "", nil, nil, 1, 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -154,7 +179,7 @@ func TestPayment_GetListPayments_PropagatesListError(t *testing.T) {
 	repo := &fakePaymentRepo{err: wantErr}
 	uc := NewPaymentUsecase(repo)
 
-	_, _, _, _, err := uc.GetListPayments("", "", 1, 10, "")
+	_, _, _, _, err := uc.GetListPayments("", "", nil, nil, 1, 10, "")
 	if !errors.Is(err, wantErr) {
 		t.Errorf("err = %v, want %v", err, wantErr)
 	}

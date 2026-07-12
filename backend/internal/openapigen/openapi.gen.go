@@ -19,6 +19,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
@@ -91,6 +92,12 @@ type GetDashboardV1PaymentsParams struct {
 
 	// Search search payments by merchant name or payment id
 	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// DateFrom filter payments created on or after this date (YYYY-MM-DD)
+	DateFrom *openapi_types.Date `form:"date_from,omitempty" json:"date_from,omitempty"`
+
+	// DateTo filter payments created on or before this date (YYYY-MM-DD)
+	DateTo *openapi_types.Date `form:"date_to,omitempty" json:"date_to,omitempty"`
 
 	// Page page number (1-indexed)
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
@@ -210,6 +217,32 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "search"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "date_from" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "date_from", r.URL.Query(), &params.DateFrom, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "date_from"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_from", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "date_to" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "date_to", r.URL.Query(), &params.DateTo, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "date_to"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_to", Err: err})
 		}
 		return
 	}
@@ -402,24 +435,25 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
+	"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",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

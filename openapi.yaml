@@ -164,6 +164,18 @@ paths:
             type: string
           description: search payments by merchant name or payment id
         - in: query
+          name: date_from
+          schema:
+            type: string
+            format: date
+          description: filter payments created on or after this date (YYYY-MM-DD)
+        - in: query
+          name: date_to
+          schema:
+            type: string
+            format: date
+          description: filter payments created on or before this date (YYYY-MM-DD)
+        - in: query
           name: page
           schema:
             type: integer
