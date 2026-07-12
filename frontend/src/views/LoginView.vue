@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import LottiePlayer from '../components/LottiePlayer.vue'
 import TextInput from '../components/TextInput.vue'
 import Button from '../components/Button.vue'
 import durianpayLogo from '../assets/brand/durianpay-logo.avif'
-import loginAnimation from '../assets/animation/login-animation.json'
 import awaitToError from '../lib/await-to-error.ts'
 import { ROUTE_DASHBOARD } from '../constants/routes'
+
+const LoginAnimation = defineAsyncComponent(() => import('../components/LoginAnimation.vue'))
 
 const router = useRouter()
 const route = useRoute()
@@ -40,7 +40,7 @@ async function handleSubmit() {
 
             <div class="flex flex-col items-center justify-center">
                 <div class="relative mb-2 h-[260px] w-[260px]">
-                    <LottiePlayer :animation-data="loginAnimation" class="h-[260px] w-[260px]" />
+                    <LoginAnimation class="h-[260px] w-[260px]" />
                     <div
                         class="animate-float-a absolute top-1.5 -left-7 h-[22px] w-[22px] text-center text-[22px] leading-[22px] text-[#5A5B66]">
                         +
