@@ -43,10 +43,10 @@ watch(isCollapsed, () => {
 })
 
 function getGreetingWord(hour: number): string {
-    if (hour < 11) return 'Pagi'
-    if (hour < 15) return 'Siang'
-    if (hour < 19) return 'Sore'
-    return 'Malam'
+    if (hour < 11) return 'Morning'
+    if (hour < 15) return 'Afternoon'
+    if (hour < 19) return 'Evening'
+    return 'Night'
 }
 
 const greetingWord = getGreetingWord(new Date().getHours())
@@ -56,7 +56,7 @@ const roleLabel = computed(() => (authStore.user?.role === UserRole.OPERATION ? 
 const userInitials = computed(() => (authStore.user?.role === UserRole.OPERATION ? 'OP' : 'CS'))
 
 const { displayText: headerText } = useTypewriter([
-    `Selamat ${greetingWord}, ${userEmail.value}`,
+    `Good ${greetingWord}, ${userEmail.value}`,
     'Durianpay Payments Ops Dashboard',
 ])
 
