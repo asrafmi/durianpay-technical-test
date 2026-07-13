@@ -111,9 +111,12 @@ Once the server is running, the API docs are available at:
 - `POST /dashboard/v1/auth/login` - authenticate with `{email, password}`, returns a JWT and user role
 - `GET /dashboard/v1/payments` - list payments (requires `Authorization: Bearer <token>`), supports:
   - `status=<completed|processing|failed>` - filter by status
-  - `search=<text>` - filter by merchant name (substring match)
+  - `search=<text>` - filter by merchant name or payment ID (substring match on either)
+  - `date_from=<YYYY-MM-DD>` / `date_to=<YYYY-MM-DD>` - filter by creation date, inclusive on both ends. Dates are interpreted in the `Asia/Jakarta` (WIB) business timezone before being compared against `created_at` (stored in UTC) - see `businessTimezone` in `internal/module/payment/repository/payment.go`.
+  - `sort=<field>` - comma-separated sort fields, prefix `-` for descending (e.g. `-created_at`, `amount`). Valid fields: `created_at`, `amount`, `merchant`, `status`. Defaults to `-created_at`.
   - `page=<n>` - page number, 1-indexed (default `1`)
   - `limit=<n>` - items per page, max `100` (default `10`)
+- `GET /dashboard/v1/payments/summary` - aggregate counts (requires `Authorization: Bearer <token>`), returns `{total, success, failed, processing}` across all payments (not affected by the filters above)
 
 ## Makefile targets
 

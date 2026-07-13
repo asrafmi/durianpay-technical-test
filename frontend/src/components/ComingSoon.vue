@@ -22,17 +22,16 @@ function goBack() {
       class="animate-page-enter-up text-2xl font-bold tracking-tight"
       style="animation-delay: 0.3s"
     >
-      Oops! Halaman Belum Tersedia :(
+      Oops! This Page Isn't Ready Yet :(
     </h1>
 
     <p
       class="animate-page-enter-up max-w-[520px] text-sm leading-relaxed text-text-muted"
       style="animation-delay: 0.6s"
     >
-      Halaman ini sedang dalam pengembangan. Mohon tunggu beberapa saat hingga kurun waktu
-      yang tidak dapat ditentukan.
+      This page is still under development. Please check back later.
       <br />
-      Mohon maaf atas ketidaknyamanannya.
+      Sorry for the inconvenience.
     </p>
 
     <div class="mt-4 flex items-center gap-3">
@@ -41,7 +40,7 @@ function goBack() {
           to="/dashboard"
           class="inline-block cursor-pointer rounded-[10px] bg-primary px-5 py-2.5 font-sans text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
         >
-          Halaman Dashboard
+          Go to Dashboard
         </RouterLink>
       </div>
       <div class="animate-page-enter-up" style="animation-delay: 1.2s">
@@ -50,7 +49,7 @@ function goBack() {
           class="cursor-pointer rounded-[10px] border border-border bg-white px-5 py-2.5 font-sans text-sm font-semibold text-text-primary transition-colors hover:border-border-hover"
           @click="goBack"
         >
-          Kembali
+          Go Back
         </button>
       </div>
     </div>

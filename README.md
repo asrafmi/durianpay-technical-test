@@ -7,6 +7,10 @@ A fullstack payment monitoring dashboard: Go REST API backend, Vue 3 + TypeScrip
 
 The API contract is defined in [`openapi.yaml`](openapi.yaml) at the repo root and is the source of truth for both the generated Go server types and the frontend API client.
 
+## Live demo
+
+The production deployment is available at [asraf-durianpay.duckdns.org/login](https://asraf-durianpay.duckdns.org/login). See [backend/README.md](backend/README.md) for seeded credentials.
+
 ## Preview
 
 **Login**
