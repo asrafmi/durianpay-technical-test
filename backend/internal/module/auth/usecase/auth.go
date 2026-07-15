@@ -42,9 +42,10 @@ func (a *Auth) Login(email string, password string) (string, *entity.User, error
 	}
 
 	claims := jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(a.ttl).Unix(),
-		"iat": time.Now().Unix(),
+		"sub":  user.ID,
+		"exp":  time.Now().Add(a.ttl).Unix(),
+		"iat":  time.Now().Unix(),
+		"role": user.Role,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := token.SignedString(a.jwtSecret)

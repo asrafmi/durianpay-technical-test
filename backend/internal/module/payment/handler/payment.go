@@ -21,6 +21,11 @@ func NewPaymentHandler(paymentUC paymentUsecase.PaymentUsecase) *PaymentHandler 
 	}
 }
 
+func getRoleFromContext(r *http.Request) string {
+	role, _ := r.Context().Value(transport.CtxKeyRole).(string)
+	return role
+}
+
 func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 	status := string(p.Status)
 	createdAt, err := time.Parse(time.RFC3339, p.CreatedAt)
@@ -94,6 +99,11 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 }
 
 func (p *PaymentHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+	if getRoleFromContext(r) != "operation" {
+		transport.WriteAppError(w, entity.ErrorForbidden("forbidden"))
+		return
+	}
+
 	summary, err := p.paymentUC.GetPaymentSummary()
 	if err != nil {
 		transport.WriteError(w, err)

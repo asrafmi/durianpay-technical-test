@@ -35,11 +35,14 @@ function loadStoredAuth(): StoredAuth | null {
 export const useAuthStore = defineStore('auth', () => {
   const stored = loadStoredAuth()
   const user = ref<AuthUser | null>(stored?.user ?? null)
+  const role = ref<UserRole | null>(stored?.user?.role ?? null)
   const token = ref<string | null>(stored?.token ?? null)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
+  const isOperation = computed(() => role.value === 'operation')
+  const isCS = computed(() => role.value === 'cs')
 
   async function login(email: string, password: string) {
     isLoading.value = true
@@ -71,5 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
-  return { user, token, isAuthenticated, isLoading, error, login, logout }
+  console.log('role.value', role.value)
+  console.log('isOperation.value', isOperation.value)
+  return { user, role, isOperation, isCS, token, isAuthenticated, isLoading, error, login, logout }
 })

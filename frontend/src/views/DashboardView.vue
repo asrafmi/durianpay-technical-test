@@ -17,11 +17,13 @@ import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore, type Payment } from '../stores/payment.ts'
 import { usePaymentFilters } from '../composables/usePaymentFilters'
 import { useSlidingIndicator } from '../composables/useSlidingIndicator'
+import { useAuthStore } from '../stores/auth.ts'
 
 const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
 const pageSize = 10
 
 const paymentStore = usePaymentStore()
+const authStore = useAuthStore()
 const {
     searchQuery,
     status,
@@ -35,6 +37,7 @@ const {
     goToPrevPage,
     goToNextPage,
 } = usePaymentFilters(pageSize)
+const { isOperation } = authStore
 
 const selectedPayment = ref<Payment | null>(null)
 const isPanelOpen = ref(false)
@@ -88,7 +91,7 @@ function handleClosePanel() {
             {{ paymentStore.error }}
         </div>
 
-        <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div v-if="isOperation" class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <template v-if="paymentStore.isLoadingPaymentSummary">
                 <SummaryCardSkeleton v-for="i in 4" :key="i" />
             </template>

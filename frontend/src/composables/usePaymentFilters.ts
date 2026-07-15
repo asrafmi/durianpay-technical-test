@@ -2,11 +2,14 @@ import { computed, ref, watch, watchEffect } from 'vue'
 import { usePaymentStore } from '../stores/payment'
 import { StatusFilter } from '../constants/payment-status'
 import { useDebounce } from './useDebounce'
+import { useAuthStore } from '../stores/auth'
 
 const SEARCH_DEBOUNCE_MS = 400
 
 export function usePaymentFilters(pageSize = 10) {
   const paymentStore = usePaymentStore()
+  const authStore = useAuthStore()
+  const { isOperation } = authStore
 
   const searchQuery = ref<string>('')
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS)
@@ -36,7 +39,10 @@ export function usePaymentFilters(pageSize = 10) {
       date_from: dateFrom.value,
       date_to: dateTo.value,
     })
-    paymentStore.fetchPaymentSummary()
+
+    if (isOperation) {
+      paymentStore.fetchPaymentSummary()
+    }
   })
 
   function handleStatusChange(newStatus: StatusFilter) {

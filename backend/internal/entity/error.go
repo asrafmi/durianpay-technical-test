@@ -13,6 +13,7 @@ const (
 	ErrorCodeNotFound     Code = "not_found"
 	ErrorCodeUnauthorized Code = "unauthorized"
 	ErrorCodeBadRequest   Code = "bad_request"
+	ErrorCodeForbidden    Code = "forbidden"
 )
 
 type AppError struct {
@@ -45,3 +46,4 @@ func ErrorNotFound(msg string) *AppError     { return NewError(ErrorCodeNotFound
 func ErrorUnauthorized(msg string) *AppError { return NewError(ErrorCodeUnauthorized, msg) }
 func ErrorInternal(msg string) *AppError     { return NewError(ErrorCodeInternal, msg) }
 func ErrorBadRequest(msg string) *AppError   { return NewError(ErrorCodeBadRequest, msg) }
+func ErrorForbidden(msg string) *AppError    { return NewError(ErrorCodeForbidden, msg) }

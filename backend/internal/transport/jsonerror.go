@@ -22,6 +22,8 @@ func CodeToStatus(code entity.Code) int {
 		return http.StatusNotFound
 	case entity.ErrorCodeUnauthorized:
 		return http.StatusUnauthorized
+	case entity.ErrorCodeForbidden:
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}
