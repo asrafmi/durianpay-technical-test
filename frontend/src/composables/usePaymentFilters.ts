@@ -9,7 +9,6 @@ const SEARCH_DEBOUNCE_MS = 400
 export function usePaymentFilters(pageSize = 10) {
   const paymentStore = usePaymentStore()
   const authStore = useAuthStore()
-  const { isOperation } = authStore
 
   const searchQuery = ref<string>('')
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS)
@@ -40,7 +39,7 @@ export function usePaymentFilters(pageSize = 10) {
       date_to: dateTo.value,
     })
 
-    if (isOperation) {
+    if (authStore.isOperation) {
       paymentStore.fetchPaymentSummary()
     }
   })

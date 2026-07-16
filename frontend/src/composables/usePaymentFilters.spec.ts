@@ -5,8 +5,10 @@ import { defineComponent, nextTick } from 'vue'
 import { usePaymentFilters } from './usePaymentFilters'
 import { usePaymentStore } from '../stores/payment'
 import { StatusFilter } from '../constants/payment-status'
+import { useAuthStore } from '../stores/auth'
+import { UserRole } from '../constants/user-role'
 
-function mountFilters(pageSize = 10) {
+function mountFilters(pinia: ReturnType<typeof createTestingPinia>, pageSize = 10) {
   let exposed!: ReturnType<typeof usePaymentFilters>
 
   const Host = defineComponent({
@@ -19,7 +21,7 @@ function mountFilters(pageSize = 10) {
 
   const wrapper = mount(Host, {
     global: {
-      plugins: [createTestingPinia({ stubActions: true, createSpy: undefined })],
+      plugins: [pinia],
     },
   })
 
@@ -28,7 +30,8 @@ function mountFilters(pageSize = 10) {
 
 describe('usePaymentFilters', () => {
   it('starts with default filter state', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     expect(filters.searchQuery.value).toBe('')
     expect(filters.status.value).toBe(StatusFilter.ALL)
     expect(filters.sort.value).toBe('-created_at')
@@ -37,17 +40,33 @@ describe('usePaymentFilters', () => {
     expect(filters.currentPage.value).toBe(1)
   })
 
-  it('fetches payments and summary on mount', async () => {
-    mountFilters()
+  it('fetches payments and summary on mount if user role is operation', async () => {
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const authStore = useAuthStore(pinia)
+    authStore.role = UserRole.OPERATION
+
+    mountFilters(pinia)
     await nextTick()
     const store = usePaymentStore()
     expect(store.fetchPayments).toHaveBeenCalledTimes(1)
     expect(store.fetchPaymentSummary).toHaveBeenCalledTimes(1)
   })
 
+  it('fetches payments and summary on mount if user role is cs', async () => {
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const authStore = useAuthStore(pinia)
+    authStore.role = UserRole.CS
+
+    mountFilters(pinia)
+    await nextTick()
+    const store = usePaymentStore()
+    expect(store.fetchPayments).toHaveBeenCalledTimes(1)
+  })
+
   it('refetches payments when searchQuery changes, after the debounce delay', async () => {
     vi.useFakeTimers()
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     const store = usePaymentStore()
     await nextTick()
     expect(store.fetchPayments).toHaveBeenCalledTimes(1)
@@ -65,7 +84,8 @@ describe('usePaymentFilters', () => {
   })
 
   it('resets currentPage to 1 immediately when searchQuery changes (before debounce fires)', async () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     filters.currentPage.value = 3
 
     filters.searchQuery.value = 'acme'
@@ -75,7 +95,8 @@ describe('usePaymentFilters', () => {
   })
 
   it('handleStatusChange updates status and resets currentPage to 1', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     filters.currentPage.value = 3
     filters.handleStatusChange(StatusFilter.FAILED)
     expect(filters.status.value).toBe(StatusFilter.FAILED)
@@ -83,7 +104,8 @@ describe('usePaymentFilters', () => {
   })
 
   it('handleSortToggle flips between -created_at and created_at', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     expect(filters.sort.value).toBe('-created_at')
     filters.handleSortToggle()
     expect(filters.sort.value).toBe('created_at')
@@ -92,14 +114,16 @@ describe('usePaymentFilters', () => {
   })
 
   it('handleSortToggle resets currentPage to 1', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     filters.currentPage.value = 5
     filters.handleSortToggle()
     expect(filters.currentPage.value).toBe(1)
   })
 
   it('refetches payments when dateFrom or dateTo changes', async () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     const store = usePaymentStore()
     await nextTick()
     expect(store.fetchPayments).toHaveBeenCalledTimes(1)
@@ -120,7 +144,8 @@ describe('usePaymentFilters', () => {
   })
 
   it('resets currentPage to 1 when the date range changes', async () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     filters.currentPage.value = 4
 
     filters.dateFrom.value = '2026-01-01'
@@ -130,13 +155,15 @@ describe('usePaymentFilters', () => {
   })
 
   it('goToPage clamps to at least 1', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     filters.goToPage(-5)
     expect(filters.currentPage.value).toBe(1)
   })
 
   it('goToPage clamps to totalPages when store.total is set', () => {
-    const { filters } = mountFilters(10)
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia, 10)
     const store = usePaymentStore()
     store.total = 25 // 3 pages at pageSize 10
 
@@ -145,7 +172,8 @@ describe('usePaymentFilters', () => {
   })
 
   it('goToNextPage increments currentPage', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     const store = usePaymentStore()
     store.total = 30
 
@@ -154,7 +182,8 @@ describe('usePaymentFilters', () => {
   })
 
   it('goToPrevPage decrements currentPage but not below 1', () => {
-    const { filters } = mountFilters()
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
     filters.goToPrevPage()
     expect(filters.currentPage.value).toBe(1)
 

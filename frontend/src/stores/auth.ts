@@ -36,6 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
   const stored = loadStoredAuth()
   const user = ref<AuthUser | null>(stored?.user ?? null)
   const role = ref<UserRole | null>(stored?.user?.role ?? null)
+  console.log('role.value!!', role.value)
   const token = ref<string | null>(stored?.token ?? null)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
