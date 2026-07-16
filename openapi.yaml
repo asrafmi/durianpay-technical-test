@@ -176,6 +176,13 @@ paths:
             format: date
           description: filter payments created on or before this date (YYYY-MM-DD)
         - in: query
+          name: min_amount
+          schema:
+            type: integer
+            default: 100
+            minimum: 0
+          description: minimum amount filter
+        - in: query
           name: page
           schema:
             type: integer

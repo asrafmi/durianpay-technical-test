@@ -24,8 +24,8 @@ var businessTimezone = func() *time.Location {
 }()
 
 type PaymentRepository interface {
-	GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error)
-	CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error)
+	GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int, page, limit int, sort string) ([]entity.Payment, error)
+	CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int) (int, error)
 	GetPaymentsSummary() (entity.PaymentSummary, error)
 }
 
@@ -37,7 +37,7 @@ func NewPaymentRepo(db *sql.DB) *PaymentRepo {
 	return &PaymentRepo{db: db}
 }
 
-func whereClause(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (string, []any) {
+func whereClause(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int) (string, []any) {
 	var conditions []string
 	var args []any
 
@@ -48,6 +48,10 @@ func whereClause(status entity.PaymentStatus, search string, dateFrom, dateTo *t
 	if search != "" {
 		conditions = append(conditions, "(merchant LIKE ? OR CAST(id AS TEXT) LIKE ?)")
 		args = append(args, "%"+search+"%", "%"+search+"%")
+	}
+	if minimumAmount != nil {
+		conditions = append(conditions, "amount >= ?")
+		args = append(args, *minimumAmount)
 	}
 	if dateFrom != nil {
 		startOfDay := time.Date(dateFrom.Year(), dateFrom.Month(), dateFrom.Day(), 0, 0, 0, 0, businessTimezone)
@@ -109,8 +113,8 @@ func parseSort(sort string) string {
 	return orderBy + strings.Join(orders, ", ")
 }
 
-func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error) {
-	where, args := whereClause(status, search, dateFrom, dateTo)
+func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int, page, limit int, sort string) ([]entity.Payment, error) {
+	where, args := whereClause(status, search, dateFrom, dateTo, minimumAmount)
 	orderBy := parseSort(sort)
 	query := "SELECT id, merchant, status, amount, created_at FROM payments" + where + orderBy + " LIMIT ? OFFSET ?"
 	args = append(args, limit, pagination.Offset(page, limit))
@@ -136,8 +140,8 @@ func (r *PaymentRepo) GetListPayments(status entity.PaymentStatus, search string
 	return payments, nil
 }
 
-func (r *PaymentRepo) CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error) {
-	where, args := whereClause(status, search, dateFrom, dateTo)
+func (r *PaymentRepo) CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int) (int, error) {
+	where, args := whereClause(status, search, dateFrom, dateTo, minimumAmount)
 	query := "SELECT COUNT(1) FROM payments" + where
 
 	var count int

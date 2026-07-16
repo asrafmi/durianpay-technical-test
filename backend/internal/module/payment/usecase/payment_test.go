@@ -13,16 +13,18 @@ type fakePaymentRepo struct {
 	total    int
 	err      error
 
-	gotStatus   entity.PaymentStatus
-	gotSearch   string
-	gotDateFrom *time.Time
-	gotDateTo   *time.Time
-	gotPage     int
-	gotLimit    int
-	gotSort     string
+	gotStatus    entity.PaymentStatus
+	gotSearch    string
+	gotDateFrom  *time.Time
+	gotDateTo    *time.Time
+	gotPage      int
+	gotLimit     int
+	gotSort      string
+	gotMinAmount *int
 }
 
-func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, error) {
+func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int, page, limit int, sort string) ([]entity.Payment, error) {
+	f.gotMinAmount = minimumAmount
 	f.gotStatus = status
 	f.gotSearch = search
 	f.gotDateFrom = dateFrom
@@ -36,7 +38,8 @@ func (f *fakePaymentRepo) GetListPayments(status entity.PaymentStatus, search st
 	return f.payments, nil
 }
 
-func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time) (int, error) {
+func (f *fakePaymentRepo) CountPayments(status entity.PaymentStatus, search string, dateFrom, dateTo *time.Time, minimumAmount *int) (int, error) {
+	f.gotMinAmount = minimumAmount
 	if f.err != nil {
 		return 0, f.err
 	}
@@ -98,7 +101,7 @@ func TestPayment_GetListPayments_NormalizesPagination(t *testing.T) {
 			repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
 			uc := NewPaymentUsecase(repo)
 
-			_, _, gotPage, gotLimit, err := uc.GetListPayments("", "", nil, nil, tt.inPage, tt.inLimit, "")
+			_, _, gotPage, gotLimit, err := uc.GetListPayments("", "", nil, nil, nil, tt.inPage, tt.inLimit, "")
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -120,7 +123,7 @@ func TestPayment_GetListPayments_PassesFiltersThrough(t *testing.T) {
 	repo := &fakePaymentRepo{payments: []entity.Payment{}, total: 0}
 	uc := NewPaymentUsecase(repo)
 
-	_, _, _, _, err := uc.GetListPayments("completed", "toko", nil, nil, 1, 10, "-created_at")
+	_, _, _, _, err := uc.GetListPayments("completed", "toko", nil, nil, nil, 1, 10, "-created_at")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -140,7 +143,7 @@ func TestPayment_GetListPayments_PassesDateRangeThrough(t *testing.T) {
 	dateFrom := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	dateTo := time.Date(2026, 1, 31, 0, 0, 0, 0, time.UTC)
 
-	_, _, _, _, err := uc.GetListPayments("", "", &dateFrom, &dateTo, 1, 10, "")
+	_, _, _, _, err := uc.GetListPayments("", "", &dateFrom, &dateTo, nil, 1, 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -161,7 +164,7 @@ func TestPayment_GetListPayments_ReturnsPaymentsAndTotal(t *testing.T) {
 	repo := &fakePaymentRepo{payments: want, total: 42}
 	uc := NewPaymentUsecase(repo)
 
-	got, total, _, _, err := uc.GetListPayments("", "", nil, nil, 1, 10, "")
+	got, total, _, _, err := uc.GetListPayments("", "", nil, nil, nil, 1, 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -179,7 +182,7 @@ func TestPayment_GetListPayments_PropagatesListError(t *testing.T) {
 	repo := &fakePaymentRepo{err: wantErr}
 	uc := NewPaymentUsecase(repo)
 
-	_, _, _, _, err := uc.GetListPayments("", "", nil, nil, 1, 10, "")
+	_, _, _, _, err := uc.GetListPayments("", "", nil, nil, nil, 1, 10, "")
 	if !errors.Is(err, wantErr) {
 		t.Errorf("err = %v, want %v", err, wantErr)
 	}
