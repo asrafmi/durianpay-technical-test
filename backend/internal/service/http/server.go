@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/config"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/transport"
@@ -43,9 +44,9 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowedOrigins: strings.Split(config.AllowedOrigins, ","),
+		AllowedMethods: strings.Split(config.AllowedMethods, ","),
+		AllowedHeaders: strings.Split(config.AllowedHeaders, ","),
 	}))
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
 		http.ServeFile(w, req, openapiYamlPath)
