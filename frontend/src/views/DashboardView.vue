@@ -108,10 +108,15 @@ function handleClosePanel() {
                         { color: '#2563EB', percentage: pct(processing) },
                         { color: '#E31C4D', percentage: pct(failed) },
                     ]"
+                    :statusFilter="StatusFilter.ALL"
+                    @select="handleStatusChange"
                 />
-                <SummaryCard label="Completed" :value="completed" color="#1A9E5C" :percentage="pct(completed)" />
-                <SummaryCard label="Processing" :value="processing" color="#2563EB" :percentage="pct(processing)" />
-                <SummaryCard label="Failed" :value="failed" color="#E31C4D" :percentage="pct(failed)" />
+                <SummaryCard label="Completed" :value="completed" color="#1A9E5C" :percentage="pct(completed)"
+                    :statusFilter="StatusFilter.COMPLETED" @select="handleStatusChange" />
+                <SummaryCard label="Processing" :value="processing" color="#2563EB" :percentage="pct(processing)"
+                    :statusFilter="StatusFilter.PROCESSING" @select="handleStatusChange" />
+                <SummaryCard label="Failed" :value="failed" color="#E31C4D" :percentage="pct(failed)"
+                    :statusFilter="StatusFilter.FAILED" @select="handleStatusChange" />
             </template>
         </div>
 

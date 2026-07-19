@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { StatusFilter } from '../constants/payment-status'
+
 interface Props {
   label: string
   value: number
@@ -6,15 +8,24 @@ interface Props {
   percentage: number
   showMultiBar?: boolean
   bars?: Array<{ color: string; percentage: number }>
+  statusFilter?: StatusFilter
 }
 
 withDefaults(defineProps<Props>(), {
   showMultiBar: false,
 })
+
+defineEmits<{
+  select: [statusFilter: StatusFilter]
+}>()
 </script>
 
 <template>
-  <div class="rounded-[14px] border border-border bg-white px-5 py-[18px]">
+  <div
+    class="rounded-[14px] border border-border bg-white px-5 py-[18px]"
+    :class="{ 'cursor-pointer transition-colors hover:border-border-hover': statusFilter !== undefined }"
+    @click="statusFilter !== undefined && $emit('select', statusFilter)"
+  >
     <div class="flex items-center justify-between">
       <div class="text-[13px] font-medium text-text-muted">{{ label }}</div>
       <div v-if="!showMultiBar" class="text-[13px] font-semibold" :style="{ color }">{{ percentage }}%</div>

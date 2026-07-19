@@ -42,7 +42,9 @@ export function usePaymentFilters() {
       date_from: dateFrom.value,
       date_to: dateTo.value,
     })
+  })
 
+  watchEffect(() => {
     if (authStore.isOperation) {
       paymentStore.fetchPaymentSummary()
     }
