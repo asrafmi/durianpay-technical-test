@@ -107,9 +107,9 @@ describe('usePaymentFilters', () => {
     const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
     const { filters } = mountFilters(pinia)
     expect(filters.sort.value).toBe('-created_at')
-    filters.handleSortToggle()
+    filters.handleSortToggle('created_at')
     expect(filters.sort.value).toBe('created_at')
-    filters.handleSortToggle()
+    filters.handleSortToggle('created_at')
     expect(filters.sort.value).toBe('-created_at')
   })
 
@@ -117,7 +117,7 @@ describe('usePaymentFilters', () => {
     const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
     const { filters } = mountFilters(pinia)
     filters.currentPage.value = 5
-    filters.handleSortToggle()
+    filters.handleSortToggle('created_at')
     expect(filters.currentPage.value).toBe(1)
   })
 

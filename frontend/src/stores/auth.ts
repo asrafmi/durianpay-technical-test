@@ -36,7 +36,6 @@ export const useAuthStore = defineStore('auth', () => {
   const stored = loadStoredAuth()
   const user = ref<AuthUser | null>(stored?.user ?? null)
   const role = ref<UserRole | null>(stored?.user?.role ?? null)
-  console.log('role.value!!', role.value)
   const token = ref<string | null>(stored?.token ?? null)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
@@ -62,7 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
       throw err
     }
-    
+
     user.value = { email: data.data.email, role: data.data.role }
     token.value = data.data.token
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: user.value, token: data.data.token }))
@@ -75,7 +74,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
-  console.log('role.value', role.value)
-  console.log('isOperation.value', isOperation.value)
   return { user, role, isOperation, isCS, token, isAuthenticated, isLoading, error, login, logout }
 })

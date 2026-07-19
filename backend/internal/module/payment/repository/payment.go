@@ -81,6 +81,7 @@ func parseSort(sort string) string {
 		"amount":     true,
 		"merchant":   true,
 		"status":     true,
+		"id":         true,
 	}
 
 	orderBy := " ORDER BY "
