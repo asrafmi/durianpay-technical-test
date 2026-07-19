@@ -5,6 +5,7 @@ import awaitToError from '../lib/await-to-error'
 import { getErrorMessage } from '../lib/error-message'
 import { AUTH_STORAGE_KEY } from '../constants/storage'
 import type { UserRole } from '../constants/user-role'
+import { usePaymentStore } from './payment'
 
 interface AuthUser {
   email: string
@@ -63,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     user.value = { email: data.data.email, role: data.data.role }
+    role.value = data.data.role
     token.value = data.data.token
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: user.value, token: data.data.token }))
     isLoading.value = false
@@ -70,8 +72,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     user.value = null
+    role.value = null
     token.value = null
     localStorage.removeItem(AUTH_STORAGE_KEY)
+    usePaymentStore().$reset()
   }
 
   return { user, role, isOperation, isCS, token, isAuthenticated, isLoading, error, login, logout }

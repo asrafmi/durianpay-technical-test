@@ -88,6 +88,15 @@ export const usePaymentStore = defineStore('payment', () => {
     isLoadingPaymentSummary.value = false
   }
 
+  function $reset() {
+    payments.value = []
+    total.value = 0
+    isLoadingPaymentList.value = false
+    summary.value = null
+    isLoadingPaymentSummary.value = false
+    error.value = null
+  }
+
   return {
       payments,
       total,
@@ -99,6 +108,7 @@ export const usePaymentStore = defineStore('payment', () => {
       fetchPaymentSummary,
 
       error,
+      $reset,
     }
   }
 )

@@ -40,7 +40,6 @@ const {
     goToNextPage,
     changePageSize
 } = usePaymentFilters()
-const { isOperation } = authStore
 
 const selectedPayment = ref<Payment | null>(null)
 const isPanelOpen = ref(false)
@@ -94,7 +93,7 @@ function handleClosePanel() {
             {{ paymentStore.error }}
         </div>
 
-        <div v-if="isOperation" class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div v-if="authStore.isOperation" class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <template v-if="paymentStore.isLoadingPaymentSummary">
                 <SummaryCardSkeleton v-for="i in 4" :key="i" />
             </template>
