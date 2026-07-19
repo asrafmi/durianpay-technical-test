@@ -35,6 +35,14 @@ const (
 	idleTimeout  = 60
 )
 
+func splitAndTrim(s string) []string {
+	parts := strings.Split(s, ",")
+	for i, p := range parts {
+		parts[i] = strings.TrimSpace(p)
+	}
+	return parts
+}
+
 func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, verifier TokenVerifier) *Server {
 	swagger, err := openapigen.GetSwagger()
 	if err != nil {
@@ -44,9 +52,9 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: strings.Split(config.AllowedOrigins, ","),
-		AllowedMethods: strings.Split(config.AllowedMethods, ","),
-		AllowedHeaders: strings.Split(config.AllowedHeaders, ","),
+		AllowedOrigins: splitAndTrim(config.AllowedOrigins),
+		AllowedMethods: splitAndTrim(config.AllowedMethods),
+		AllowedHeaders: splitAndTrim(config.AllowedHeaders),
 	}))
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
 		http.ServeFile(w, req, openapiYamlPath)
