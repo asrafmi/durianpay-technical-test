@@ -33,10 +33,13 @@ func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 		return openapigen.Payment{}, entity.WrapError(err, entity.ErrorCodeInternal, "invalid created_at format")
 	}
 
+	currency := "IDR"
+
 	return openapigen.Payment{
 		Id:        &p.ID,
 		Merchant:  &p.Merchant,
 		Status:    &status,
+		Currency:  &currency,
 		Amount:    &p.Amount,
 		CreatedAt: &createdAt,
 	}, nil

@@ -60,6 +60,9 @@ components:
         status:
           type: string
           example: "completed , processing , or failed"
+        currency:
+          type: string
+          example: "USD"
         amount:
           type: string
           example: "100.00"
