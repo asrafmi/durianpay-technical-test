@@ -7,7 +7,7 @@ import { PaymentListSortParams } from '../constants/payment-list-params'
 
 const SEARCH_DEBOUNCE_MS = 400
 
-export function usePaymentFilters(pageSize = 10) {
+export function usePaymentFilters() {
   const paymentStore = usePaymentStore()
   const authStore = useAuthStore()
 
@@ -19,8 +19,9 @@ export function usePaymentFilters(pageSize = 10) {
   const dateFrom = ref<string>('')
   const dateTo = ref<string>('')
   const currentPage = ref<number>(1)
+  const pageSize = ref<number>(10)
 
-  const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize)))
+  const totalPages = computed(() => Math.max(1, Math.ceil(paymentStore.total / pageSize.value)))
 
   watch(searchQuery, () => {
     currentPage.value = 1
@@ -35,7 +36,7 @@ export function usePaymentFilters(pageSize = 10) {
       search: debouncedSearchQuery.value,
       min_amount: minimumAmount.value,
       page: currentPage.value,
-      limit: pageSize,
+      limit: pageSize.value,
       status: status.value,
       sort: sort.value,
       date_from: dateFrom.value,
@@ -69,6 +70,11 @@ export function usePaymentFilters(pageSize = 10) {
     goToPage(currentPage.value + 1)
   }
 
+  function changePageSize(size: number) {
+    pageSize.value = size
+    currentPage.value = 1
+  }
+
   return {
     searchQuery,
     minimumAmount,
@@ -78,10 +84,12 @@ export function usePaymentFilters(pageSize = 10) {
     dateTo,
     currentPage,
     totalPages,
+    pageSize,
     handleStatusChange,
     handleSortToggle,
     goToPage,
     goToPrevPage,
     goToNextPage,
+    changePageSize,
   }
 }

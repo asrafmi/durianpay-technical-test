@@ -21,7 +21,6 @@ import { useSlidingIndicator } from '../composables/useSlidingIndicator'
 import { useAuthStore } from '../stores/auth.ts'
 
 const breadcrumbItems = [{ label: 'Home', to: ROUTE_DASHBOARD }, { label: 'Payments' }]
-const pageSize = 10
 
 const paymentStore = usePaymentStore()
 const authStore = useAuthStore()
@@ -33,12 +32,14 @@ const {
     dateFrom,
     dateTo,
     currentPage,
+    pageSize,
     handleStatusChange,
     handleSortToggle,
     goToPage,
     goToPrevPage,
     goToNextPage,
-} = usePaymentFilters(pageSize)
+    changePageSize
+} = usePaymentFilters()
 const { isOperation } = authStore
 
 const selectedPayment = ref<Payment | null>(null)
@@ -159,6 +160,7 @@ function handleClosePanel() {
             :goToPage="goToPage"
             :goToPrevPage="goToPrevPage"
             :goToNextPage="goToNextPage"
+            :changePageSize="changePageSize"
         />
     </div>
 

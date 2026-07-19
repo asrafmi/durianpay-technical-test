@@ -8,12 +8,12 @@ import { StatusFilter } from '../constants/payment-status'
 import { useAuthStore } from '../stores/auth'
 import { UserRole } from '../constants/user-role'
 
-function mountFilters(pinia: ReturnType<typeof createTestingPinia>, pageSize = 10) {
+function mountFilters(pinia: ReturnType<typeof createTestingPinia>) {
   let exposed!: ReturnType<typeof usePaymentFilters>
 
   const Host = defineComponent({
     setup() {
-      exposed = usePaymentFilters(pageSize)
+      exposed = usePaymentFilters()
       return {}
     },
     template: '<div />',
@@ -163,7 +163,7 @@ describe('usePaymentFilters', () => {
 
   it('goToPage clamps to totalPages when store.total is set', () => {
     const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
-    const { filters } = mountFilters(pinia, 10)
+    const { filters } = mountFilters(pinia)
     const store = usePaymentStore()
     store.total = 25 // 3 pages at pageSize 10
 
@@ -189,6 +189,15 @@ describe('usePaymentFilters', () => {
 
     filters.currentPage.value = 2
     filters.goToPrevPage()
+    expect(filters.currentPage.value).toBe(1)
+  })
+
+  it('changePageSize updates pageSize and resets currentPage to 1', () => {
+    const pinia = createTestingPinia({ stubActions: true, createSpy: undefined })
+    const { filters } = mountFilters(pinia)
+    filters.currentPage.value = 3
+    filters.changePageSize(25)
+    expect(filters.pageSize.value).toBe(25)
     expect(filters.currentPage.value).toBe(1)
   })
 })
