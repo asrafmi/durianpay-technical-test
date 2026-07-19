@@ -12,7 +12,7 @@ import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 import DateRangeFilter from '../components/DateRangeFilter.vue'
 import NumberInput from '../components/NumberInput.vue'
 
-import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
+import { formatAmount, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
 import { StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore, type Payment } from '../stores/payment.ts'
@@ -146,7 +146,7 @@ function handleClosePanel() {
             v-else
             :rows="rows"
             :formatDate="formatDate"
-            :formatCurrency="formatCurrency"
+            :formatAmount="formatAmount"
             :sort="sort"
             @sort-toggle="handleSortToggle"
             @view-detail="handleViewDetail"

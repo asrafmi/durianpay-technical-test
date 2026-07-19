@@ -14,7 +14,7 @@ interface PaymentRow extends Payment {
 defineProps<{
     rows: PaymentRow[]
     formatDate: (date: string) => string
-    formatCurrency: (amount: number) => string
+    formatAmount: (amount: number) => string
     sort: string
 }>()
 
@@ -30,8 +30,7 @@ defineEmits<{
             <table class="w-full border-collapse text-sm">
                 <thead>
                     <tr class="border-b border-border">
-                        <th
-                            class="px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase"
+                        <th class="px-5 py-[15px] text-left text-xs font-semibold tracking-wide text-text-muted uppercase"
                             @click="$emit('sort-toggle', PaymentListSortParams.ID_ASC)">
                             <div class="flex justify-center items-center gap-1.5">
                                 <span>Payment ID</span>
@@ -60,7 +59,11 @@ defineEmits<{
                             </div>
                         </th>
                         <th
-                            class="cursor-pointer px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
+                            class="px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
+                            Currency
+                        </th>
+                        <th
+                            class="px-5 py-[15px] text-center text-xs font-semibold tracking-wide text-text-muted uppercase select-none">
                             Status
                         </th>
                         <th
@@ -75,7 +78,8 @@ defineEmits<{
                         <td class="px-5 py-[15px] font-mono text-[13px] text-text-muted">{{ p.id }}</td>
                         <td class="px-5 py-[15px] font-semibold">{{ p.merchant }}</td>
                         <td class="px-5 py-[15px] text-center text-text-muted">{{ formatDate(p.created_at) }}</td>
-                        <td class="px-5 py-[15px] text-center font-semibold">{{ formatCurrency(p.amount) }}</td>
+                        <td class="px-5 py-[15px] text-center font-semibold">{{ formatAmount(p.amount) }}</td>
+                        <td class="px-5 py-[15px] text-center font-semibold">{{ p.currency }}</td>
                         <td class="px-5 py-[15px] text-center">
                             <span class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
                                 :style="{ background: p.meta.bg, color: p.meta.color }">

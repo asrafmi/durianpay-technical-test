@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { formatCurrency, formatDate, percentageOf } from './payment-format'
+import { formatAmount, formatDate, percentageOf } from './payment-format'
 
-describe('formatCurrency', () => {
+describe('formatAmount', () => {
   it('formats a whole number with the Rp prefix and thousands separator', () => {
-    expect(formatCurrency(1500000)).toBe('Rp1.500.000')
+    expect(formatAmount(1500000)).toBe('Rp1.500.000')
   })
 
   it('formats zero', () => {
-    expect(formatCurrency(0)).toBe('Rp0')
+    expect(formatAmount(0)).toBe('Rp0')
   })
 })
 

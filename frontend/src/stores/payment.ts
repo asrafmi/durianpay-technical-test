@@ -8,6 +8,7 @@ import { getErrorMessage } from '../lib/error-message'
 export interface Payment {
   id: string
   amount: number
+  currency: string
   merchant: string
   status: string
   created_at: string
