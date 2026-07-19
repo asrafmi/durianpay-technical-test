@@ -11,6 +11,7 @@ export function usePaymentFilters(pageSize = 10) {
   const authStore = useAuthStore()
 
   const searchQuery = ref<string>('')
+  const minimumAmount = ref<number | undefined>(undefined)
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS)
   const status = ref<StatusFilter>(StatusFilter.ALL)
   const sort = ref<string>('-created_at')
@@ -31,6 +32,7 @@ export function usePaymentFilters(pageSize = 10) {
   watchEffect(() => {
     paymentStore.fetchPayments({
       search: debouncedSearchQuery.value,
+      min_amount: minimumAmount.value,
       page: currentPage.value,
       limit: pageSize,
       status: status.value,
@@ -68,6 +70,7 @@ export function usePaymentFilters(pageSize = 10) {
 
   return {
     searchQuery,
+    minimumAmount,
     status,
     sort,
     dateFrom,

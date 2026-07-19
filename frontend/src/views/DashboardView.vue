@@ -10,6 +10,7 @@ import TextInput from '../components/TextInput.vue'
 import SummaryCard from '../components/SummaryCard.vue'
 import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 import DateRangeFilter from '../components/DateRangeFilter.vue'
+import NumberInput from '../components/NumberInput.vue'
 
 import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
 import { StatusFilter } from '../constants/payment-status'
@@ -26,6 +27,7 @@ const paymentStore = usePaymentStore()
 const authStore = useAuthStore()
 const {
     searchQuery,
+    minimumAmount,
     status,
     sort,
     dateFrom,
@@ -115,6 +117,7 @@ function handleClosePanel() {
 
         <div class="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
             <TextInput v-model="searchQuery" id="search-field" placeholder="Search merchant or payment ID…" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
+            <NumberInput v-model="minimumAmount" id="minimum-amount" placeholder="Minimum amount" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
 
             <div class="relative flex gap-0.5 overflow-x-auto rounded-[9px] bg-bg-light p-0.75">
                 <span
