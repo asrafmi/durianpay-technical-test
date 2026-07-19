@@ -5,6 +5,7 @@ import (
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/repository"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/date"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/pagination"
 )
 
@@ -23,6 +24,9 @@ func NewPaymentUsecase(repo repository.PaymentRepository) *Payment {
 
 func (p *Payment) GetListPayments(status, search string, dateFrom, dateTo *time.Time, minimumAmount *int, page, limit int, sort string) ([]entity.Payment, int, int, int, error) {
 	page, limit = pagination.Normalize(page, limit)
+	if !date.IsDateRangeValid(dateFrom, dateTo) {
+		return nil, 0, 0, 0, entity.WrapError(nil, entity.ErrorCodeBadRequest, "date_from must not be after date_to")
+	}
 
 	payments, err := p.repo.GetListPayments(entity.PaymentStatus(status), search, dateFrom, dateTo, minimumAmount, page, limit, sort)
 	if err != nil {
