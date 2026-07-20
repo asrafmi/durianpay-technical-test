@@ -11,6 +11,7 @@ import (
 type PaymentUsecase interface {
 	GetListPayments(status, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
 	GetPaymentSummary() (*entity.PaymentSummary, error)
+	ReviewPayment(paymentID string, status entity.PaymentReviewStatus) (entity.PaymentReviewResponse, error)
 }
 
 type Payment struct {
@@ -44,4 +45,14 @@ func (p *Payment) GetPaymentSummary() (*entity.PaymentSummary, error) {
 	}
 
 	return &summary, nil
+}
+
+func (p *Payment) ReviewPayment(paymentID string, status entity.PaymentReviewStatus) (entity.PaymentReviewResponse, error) {
+	// get context role from context
+	// if not operation maka throw forbidden
+
+	return entity.PaymentReviewResponse{
+		Status:  string(status),
+		Message: "Payment review processed",
+	}, nil
 }

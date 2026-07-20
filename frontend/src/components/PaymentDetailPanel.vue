@@ -10,6 +10,12 @@ interface Payment {
     status: string
 }
 
+enum PaymentStatus {
+    UnderReview = 'under review',
+        Approved = 'approved',
+        Rejected = 'rejected',
+}
+
 defineProps < {
     payment: Payment | null
     isOpen: boolean
@@ -17,6 +23,7 @@ defineProps < {
 
 defineEmits < {
     close: []
+    review: [paymentId: string, status: PaymentStatus]
 } > ()
 
 // Dates are displayed in Asia/Jakarta (WIB) to match how the backend
@@ -45,15 +52,15 @@ function formatTime(date: string): string {
     <div v-if="isOpen" class="fixed inset-0 z-40 bg-black/50 transition-opacity" @click="$emit('close')" />
     
     <div :class="[
-              'fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-lg transition-transform duration-300',
-              isOpen ? 'translate-x-0' : 'translate-x-full',
-            ]">
+                      'fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-lg transition-transform duration-300',
+                      isOpen ? 'translate-x-0' : 'translate-x-full',
+                    ]">
         <div v-if="payment" class="flex h-full flex-col overflow-hidden">
             <div class="flex items-center justify-between border-b border-[#E5E5EA] px-6 py-4">
                 <h2 class="text-lg font-bold">Payment Details</h2>
                 <button type="button" @click="$emit('close')" class="cursor-pointer rounded-lg p-2 hover:bg-[#F0F0F3] transition-colors">
-                  <X :size="20" class="text-[#6B6B76]" />
-                </button>
+                          <X :size="20" class="text-[#6B6B76]" />
+                        </button>
             </div>
     
             <div class="flex-1 overflow-y-auto px-6 py-4">
@@ -94,8 +101,10 @@ function formatTime(date: string): string {
                 </div>
             </div>
     
-            <div class="border-t border-[#E5E5EA] px-6 py-4">
+            <div class="flex flex-col gap-5 border-t border-[#E5E5EA] px-6 py-4">
                 <Button type="button" variant="primary" class="w-full" @click="$emit('close')">Close</Button>
+                <Button type="button" variant="secondary" class="w-full" @click="$emit('review', payment.id, PaymentStatus.Approved)">Approve</Button>
+                <Button type="button" variant="secondary" class="w-full" @click="$emit('review', payment.id, PaymentStatus.Rejected)">Reject</Button>
             </div>
         </div>
     </div>

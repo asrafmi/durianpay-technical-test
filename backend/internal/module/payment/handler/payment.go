@@ -111,3 +111,39 @@ func (p *PaymentHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r 
 		return
 	}
 }
+
+func (p *PaymentHandler) PostDashboardV1PaymentsReviewPaymentId(w http.ResponseWriter, r *http.Request, paymentId openapigen.PaymentId) {
+	if paymentId == "" {
+		transport.WriteAppError(w, entity.ErrorBadRequest("payment_id is required"))
+		return
+	}
+	paymentID := paymentId
+
+	var request openapigen.PaymentReviewRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		transport.WriteAppError(w, entity.ErrorBadRequest("invalid request body"))
+		return
+	}
+
+	if request.Status == nil {
+		transport.WriteAppError(w, entity.ErrorBadRequest("status is required"))
+		return
+	}
+	status := entity.PaymentReviewStatus(*request.Status)
+
+	response, err := p.paymentUC.ReviewPayment(paymentID, status)
+	if err != nil {
+		transport.WriteError(w, err)
+		return
+	}
+
+	responseStatus := openapigen.PaymentReviewResponseStatus(response.Status)
+	err = json.NewEncoder(w).Encode(openapigen.PaymentReviewResponse{
+		Status:  &responseStatus,
+		Message: &response.Message,
+	})
+	if err != nil {
+		transport.WriteAppError(w, entity.ErrorInternal("internal server error"))
+		return
+	}
+}

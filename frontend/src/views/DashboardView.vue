@@ -74,6 +74,11 @@ function handleClosePanel() {
     isPanelOpen.value = false
     selectedPayment.value = null
 }
+
+function onPaymentReview(paymentId: string, status: string) {
+    paymentStore.reviewPayment(paymentId, status as any)
+    handleClosePanel()
+}
 </script>
 
 <template>
@@ -160,5 +165,6 @@ function handleClosePanel() {
         :payment="selectedPayment"
         :isOpen="isPanelOpen"
         @close="handleClosePanel"
+        @review="onPaymentReview"
     />
 </template>

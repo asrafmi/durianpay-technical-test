@@ -23,6 +23,13 @@ components:
       schema:
         type: string
         example: "-created_at"
+    payment_id:
+      name: payment_id
+      in: path
+      description: Payment ID
+      required: true
+      schema:
+        type: string
 
   schemas:
     Error:
@@ -66,7 +73,13 @@ components:
         created_at:
           type: string
           format: date-time
-
+    PaymentReviewRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["under review", "approved", "rejected"]
+          example: "under review"
   responses:
     LoginResponse:
       description: return token and user information
@@ -113,6 +126,20 @@ components:
               processing:
                 type: integer
                 example: 10
+    PaymentReviewResponse:
+      description: Payment Review Summary
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: ["under review", "approved", "rejected"]
+                example: "under review"
+              message:
+                type: string
+                example: "Payment review summary"
     UnauthorizedError:
       description: Authentication failed or missing credentials
       content:
@@ -195,6 +222,27 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/PaymentListResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /dashboard/v1/payments/review/{payment_id}:
+    post:
+      summary: Update payment review status
+      description: Update payment review status (e.g., "reject" or "approve")
+      parameters:
+        - $ref: '#/components/parameters/payment_id'
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentReviewRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/PaymentReviewResponse'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
   /dashboard/v1/payments/summary:

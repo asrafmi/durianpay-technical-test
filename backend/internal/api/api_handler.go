@@ -26,3 +26,7 @@ func (h *APIHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Reque
 func (h *APIHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
 	h.Payment.GetDashboardV1PaymentsSummary(w, r)
 }
+
+func (h *APIHandler) PostDashboardV1PaymentsReviewPaymentId(w http.ResponseWriter, r *http.Request, paymentId openapigen.PaymentId) {
+	h.Payment.PostDashboardV1PaymentsReviewPaymentId(w, r, paymentId)
+}
