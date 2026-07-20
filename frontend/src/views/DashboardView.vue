@@ -6,7 +6,7 @@ import Breadcrumb from '../components/Breadcrumb.vue'
 import PaymentTable from '../components/PaymentTable.vue'
 import PaymentTableSkeleton from '../components/PaymentTableSkeleton.vue'
 import PaymentDetailPanel from '../components/PaymentDetailPanel.vue'
-import TextInput from '../components/TextInput.vue'
+import SearchInputWithHistory from '../components/SearchInputWithHistory.vue'
 import SummaryCard from '../components/SummaryCard.vue'
 import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 import DateRangeFilter from '../components/DateRangeFilter.vue'
@@ -121,7 +121,7 @@ function handleClosePanel() {
         </div>
 
         <div class="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
-            <TextInput v-model="searchQuery" id="search-field" placeholder="Search merchant or payment ID…" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
+            <SearchInputWithHistory v-model="searchQuery" id="search-field" placeholder="Search merchant or payment ID…" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
             <NumberInput v-model="minimumAmount" id="minimum-amount" placeholder="Minimum amount" containerClass="w-full sm:min-w-[220px] sm:flex-1" />
 
             <div class="relative flex gap-0.5 overflow-x-auto rounded-[9px] bg-bg-light p-0.75">
