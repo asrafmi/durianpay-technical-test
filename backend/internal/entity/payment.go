@@ -15,10 +15,22 @@ type PaymentSummary struct {
 	Processing int `json:"processing"`
 }
 
+type PaymentReviewResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 type PaymentStatus string
 
 const (
 	PaymentStatusCompleted  PaymentStatus = "completed"
 	PaymentStatusProcessing PaymentStatus = "processing"
 	PaymentStatusFailed     PaymentStatus = "failed"
+)
+
+type PaymentReviewStatus string
+
+const (
+	PaymentReviewStatusApproved PaymentReviewStatus = "approved"
+	PaymentReviewStatusRejected PaymentReviewStatus = "rejected"
 )

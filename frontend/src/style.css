@@ -6,6 +6,9 @@
   --color-primary: #E31C4D;
   --color-primary-dark: #B8123A;
   --color-success: #1A9E5C;
+  --color-success-dark: #15804C;
+  --color-danger: #DC2626;
+  --color-danger-dark: #B91C1C;
   --color-processing: #2563EB;
   --color-error: #E31C4D;
   --color-error-bg: #FDE8ED;
@@ -28,6 +31,11 @@
 
 body {
   margin: 0;
+}
+
+.Toastify__toast {
+  font-family: var(--font-sans) !important;
+  border-radius: 14px !important;
 }
 
 @keyframes floatA {

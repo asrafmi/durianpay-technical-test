@@ -12,7 +12,7 @@ import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 import DateRangeFilter from '../components/DateRangeFilter.vue'
 
 import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
-import { StatusFilter } from '../constants/payment-status'
+import { PaymentReviewStatus, StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore, type Payment } from '../stores/payment.ts'
 import { usePaymentFilters } from '../composables/usePaymentFilters'
@@ -74,6 +74,11 @@ function handleClosePanel() {
     isPanelOpen.value = false
     selectedPayment.value = null
 }
+
+function onPaymentReview(paymentId: string, status: PaymentReviewStatus) {
+    paymentStore.reviewPayment(paymentId, status)
+    handleClosePanel()
+}
 </script>
 
 <template>
@@ -83,11 +88,6 @@ function handleClosePanel() {
             <div class="mt-2 text-2xl font-bold tracking-tight">Payments</div>
             <div class="mt-0.5 text-sm text-text-muted">Monitor and manage incoming payments.</div>
         </div>
-
-        <div v-if="paymentStore.error" class="rounded-lg bg-error-bg px-3.5 py-2.5 text-[13px] text-error-text">
-            {{ paymentStore.error }}
-        </div>
-
         <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <template v-if="paymentStore.isLoadingPaymentSummary">
                 <SummaryCardSkeleton v-for="i in 4" :key="i" />
@@ -160,5 +160,6 @@ function handleClosePanel() {
         :payment="selectedPayment"
         :isOpen="isPanelOpen"
         @close="handleClosePanel"
+        @review="onPaymentReview"
     />
 </template>

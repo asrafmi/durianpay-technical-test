@@ -12,6 +12,7 @@ import (
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/transport"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -43,7 +44,7 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
 	}))
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
@@ -65,9 +66,14 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 						}
 
 						tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-						if _, err := verifier.VerifyToken(tokenString); err != nil {
+						claims, err := verifier.VerifyToken(tokenString)
+						if err != nil {
 							return entity.ErrorUnauthorized("invalid or expired token")
 						}
+
+						role, _ := claims["role"].(string)
+						req := input.RequestValidationInput.Request
+						*req = *req.WithContext(context.WithValue(req.Context(), transport.CtxKeyRole, role))
 
 						return nil
 					},
