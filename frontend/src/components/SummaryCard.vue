@@ -22,7 +22,7 @@ defineEmits<{
 
 <template>
   <div
-    class="rounded-[14px] border border-border bg-white px-5 py-[18px]"
+    class="rounded-[14px] border border-border bg-white px-5 py-[18px] w-full"
     :class="{ 'cursor-pointer transition-colors hover:border-border-hover': statusFilter !== undefined }"
     @click="statusFilter !== undefined && $emit('select', statusFilter)"
   >
