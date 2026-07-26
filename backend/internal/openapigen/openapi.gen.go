@@ -23,9 +23,8 @@ import (
 
 // Defines values for PaymentReviewRequestStatus.
 const (
-	PaymentReviewRequestStatusApproved    PaymentReviewRequestStatus = "approved"
-	PaymentReviewRequestStatusRejected    PaymentReviewRequestStatus = "rejected"
-	PaymentReviewRequestStatusUnderReview PaymentReviewRequestStatus = "under review"
+	PaymentReviewRequestStatusApproved PaymentReviewRequestStatus = "approved"
+	PaymentReviewRequestStatusRejected PaymentReviewRequestStatus = "rejected"
 )
 
 // Valid indicates whether the value is a known member of the PaymentReviewRequestStatus enum.
@@ -35,8 +34,6 @@ func (e PaymentReviewRequestStatus) Valid() bool {
 		return true
 	case PaymentReviewRequestStatusRejected:
 		return true
-	case PaymentReviewRequestStatusUnderReview:
-		return true
 	default:
 		return false
 	}
@@ -44,9 +41,8 @@ func (e PaymentReviewRequestStatus) Valid() bool {
 
 // Defines values for PaymentReviewResponseStatus.
 const (
-	PaymentReviewResponseStatusApproved    PaymentReviewResponseStatus = "approved"
-	PaymentReviewResponseStatusRejected    PaymentReviewResponseStatus = "rejected"
-	PaymentReviewResponseStatusUnderReview PaymentReviewResponseStatus = "under review"
+	PaymentReviewResponseStatusApproved PaymentReviewResponseStatus = "approved"
+	PaymentReviewResponseStatusRejected PaymentReviewResponseStatus = "rejected"
 )
 
 // Valid indicates whether the value is a known member of the PaymentReviewResponseStatus enum.
@@ -56,28 +52,23 @@ func (e PaymentReviewResponseStatus) Valid() bool {
 		return true
 	case PaymentReviewResponseStatusRejected:
 		return true
-	case PaymentReviewResponseStatusUnderReview:
-		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus.
+// Defines values for PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus.
 const (
-	PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatusApproved    PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus = "approved"
-	PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatusRejected    PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus = "rejected"
-	PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatusUnderReview PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus = "under review"
+	PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatusApproved PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus = "approved"
+	PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatusRejected PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus = "rejected"
 )
 
-// Valid indicates whether the value is a known member of the PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus enum.
-func (e PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus) Valid() bool {
+// Valid indicates whether the value is a known member of the PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus enum.
+func (e PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus) Valid() bool {
 	switch e {
-	case PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatusApproved:
+	case PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatusApproved:
 		return true
-	case PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatusRejected:
-		return true
-	case PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatusUnderReview:
+	case PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatusRejected:
 		return true
 	default:
 		return false
@@ -111,11 +102,11 @@ type Payment struct {
 
 // PaymentReviewRequest defines model for PaymentReviewRequest.
 type PaymentReviewRequest struct {
-	// Status Example: under review
+	// Status Example: approved
 	Status *PaymentReviewRequestStatus `json:"status,omitempty"`
 }
 
-// PaymentReviewRequestStatus Example: under review
+// PaymentReviewRequestStatus Example: approved
 type PaymentReviewRequestStatus string
 
 // User defines model for User.
@@ -152,11 +143,11 @@ type PaymentReviewResponse struct {
 	// Message Example: Payment review summary
 	Message *string `json:"message,omitempty"`
 
-	// Status Example: under review
+	// Status Example: approved
 	Status *PaymentReviewResponseStatus `json:"status,omitempty"`
 }
 
-// PaymentReviewResponseStatus Example: under review
+// PaymentReviewResponseStatus Example: approved
 type PaymentReviewResponseStatus string
 
 // PaymentSummaryResponse defines model for PaymentSummaryResponse.
@@ -207,14 +198,14 @@ type GetDashboardV1PaymentsParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus defines parameters for PostDashboardV1PaymentsReviewPaymentId.
-type PostDashboardV1PaymentsReviewPaymentId200JSONResponseBodyStatus string
+// PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus defines parameters for PatchDashboardV1PaymentsPaymentIdReview.
+type PatchDashboardV1PaymentsPaymentIdReview200JSONResponseBodyStatus string
 
 // PostDashboardV1AuthLoginJSONRequestBody defines body for PostDashboardV1AuthLogin for application/json ContentType.
 type PostDashboardV1AuthLoginJSONRequestBody PostDashboardV1AuthLoginJSONBody
 
-// PostDashboardV1PaymentsReviewPaymentIdJSONRequestBody defines body for PostDashboardV1PaymentsReviewPaymentId for application/json ContentType.
-type PostDashboardV1PaymentsReviewPaymentIdJSONRequestBody = PaymentReviewRequest
+// PatchDashboardV1PaymentsPaymentIdReviewJSONRequestBody defines body for PatchDashboardV1PaymentsPaymentIdReview for application/json ContentType.
+type PatchDashboardV1PaymentsPaymentIdReviewJSONRequestBody = PaymentReviewRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -224,12 +215,12 @@ type ServerInterface interface {
 	// GetDashboardV1Payments List of payments
 	// (GET /dashboard/v1/payments)
 	GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params GetDashboardV1PaymentsParams)
-	// PostDashboardV1PaymentsReviewPaymentId Update payment review status
-	// (POST /dashboard/v1/payments/review/{payment_id})
-	PostDashboardV1PaymentsReviewPaymentId(w http.ResponseWriter, r *http.Request, paymentId PaymentId)
 	// GetDashboardV1PaymentsSummary Get payment summary
 	// (GET /dashboard/v1/payments/summary)
 	GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request)
+	// PatchDashboardV1PaymentsPaymentIdReview Update payment review status
+	// (PATCH /dashboard/v1/payments/{payment_id}/review)
+	PatchDashboardV1PaymentsPaymentIdReview(w http.ResponseWriter, r *http.Request, paymentId PaymentId)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -248,15 +239,15 @@ func (_ Unimplemented) GetDashboardV1Payments(w http.ResponseWriter, r *http.Req
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// PostDashboardV1PaymentsReviewPaymentId Update payment review status
-// (POST /dashboard/v1/payments/review/{payment_id})
-func (_ Unimplemented) PostDashboardV1PaymentsReviewPaymentId(w http.ResponseWriter, r *http.Request, paymentId PaymentId) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
 // GetDashboardV1PaymentsSummary Get payment summary
 // (GET /dashboard/v1/payments/summary)
 func (_ Unimplemented) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// PatchDashboardV1PaymentsPaymentIdReview Update payment review status
+// (PATCH /dashboard/v1/payments/{payment_id}/review)
+func (_ Unimplemented) PatchDashboardV1PaymentsPaymentIdReview(w http.ResponseWriter, r *http.Request, paymentId PaymentId) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -394,8 +385,22 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 	handler.ServeHTTP(w, r)
 }
 
-// PostDashboardV1PaymentsReviewPaymentId operation middleware
-func (siw *ServerInterfaceWrapper) PostDashboardV1PaymentsReviewPaymentId(w http.ResponseWriter, r *http.Request) {
+// GetDashboardV1PaymentsSummary operation middleware
+func (siw *ServerInterfaceWrapper) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDashboardV1PaymentsSummary(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchDashboardV1PaymentsPaymentIdReview operation middleware
+func (siw *ServerInterfaceWrapper) PatchDashboardV1PaymentsPaymentIdReview(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	_ = err
@@ -410,21 +415,7 @@ func (siw *ServerInterfaceWrapper) PostDashboardV1PaymentsReviewPaymentId(w http
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostDashboardV1PaymentsReviewPaymentId(w, r, paymentId)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// GetDashboardV1PaymentsSummary operation middleware
-func (siw *ServerInterfaceWrapper) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetDashboardV1PaymentsSummary(w, r)
+		siw.Handler.PatchDashboardV1PaymentsPaymentIdReview(w, r, paymentId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -554,7 +545,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/dashboard/v1/payments", wrapper.GetDashboardV1Payments)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/dashboard/v1/payments/review/{payment_id}", wrapper.PostDashboardV1PaymentsReviewPaymentId)
+		r.Patch(options.BaseURL+"/dashboard/v1/payments/{payment_id}/review", wrapper.PatchDashboardV1PaymentsPaymentIdReview)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/dashboard/v1/payments/summary", wrapper.GetDashboardV1PaymentsSummary)
@@ -568,29 +559,29 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"vFhtb9s2EP4rBLcPaSdbcltghYF96JatyNBgQbtuCJKgYaRzzFYk1SOVxAv834cj9Woz70W/WeSRz93D",
-	"e/U1z42qjAbtLJ9f80qgUOAAm6+VAu0+yYK+CrA5yspJo/mcH4Q9trfLEy5ppRJuyROuhQL/1Z1NOMLX",
-	"WiIUfO6whoTbfAlK0KVuVZG0dSj1OV+vE24Num2434xSYmKBFHRQMJJiCwllYaeMNo1mlXAOUNs5O53k",
-	"CCT3SbhTtlMhLOQVO52csl8Y3fuMnQplak2b2rDRvrD5s2PdGvW1Blz1VnnlhvrDlVBVSVsDSJ5s2bUm",
-	"EmxltAVP7TtzLvX7ZoUWcqMdaG+5qKpS5oIsTz9bMv96gPgjwoLP+Q9p/3Jp2LXpRwsYwMbsIbgaNXPm",
-	"C2gmdMFqC8ikXhhUHoevk/ZF30nrHqVYhaYCdDIYWEol3YihWdbRIrWDc1I14ZU4h7FYXMrr5m+WDpS9",
-	"i4nGGDrb3CYQxcp/GyfKEeSrF9uY/UFz9hlyF6O1jQGibMDge7iQcPkNOFRg7SY9HSh6FGZrpYR30Q2X",
-	"S7h1wtX+ItC14vMjXusCsDnJE9IFzQWECCUjoeAnyQBrQ347WO9NUeCEfWi07clqVr4BWwshSyhGZL2I",
-	"uxyaHKwlG+72T1vnJDyS/Dkque1Xsyx7mmMN6PqoRe2WBuV/UPyOaPAeTDWKeOVrfx60I6FAU+s6c74v",
-	"PR3MUFK4EKUsQq7gCb8QZd28SkGhks2S3i8brbpb50zddJO38n5ZLJgXoeVNjyWNZuHBCapFzREKEhCl",
-	"5T2et7/jbOw0waphLsiiCSgaive3PhY7fVE8Cmr0KCdbPtLFy7YJoZKNNZtl2TTLYklhUKUoZnwB4HNe",
-	"CAcTJxXEzshi4/aYkALMl2JTkf1mlb25I0N1J8ghSqAan7A+UllCpDYhfo9MtJWMv9ZgI+R9/xyZcF+l",
-	"tzQBJWQZaYkSjqaE6EbwrWgXtZliEm4hr1G61QeKiQB5BgIBKar6rz9aj/jz37/bToduCru9gUvnqhCj",
-	"1EZ4JaTzhOzWKIU+ECu2K+zyzAgs2JuDPcolgDZE8myaTTMywVSgRSX5nL+cZtOXPPFtpNcuLdrj6cUs",
-	"pUhLS+qaPHUmPCYR6JPBXkFp01jXYf4zI8N8n9V0oGDdr6ZYPaHE3PxGlbD20mARf41hqIc7BidOogVh",
-	"3DJvto8vsuymLNrJpeMec53wV9ns7lPbhcZ7T1cr/K3sUrol86awn1hnCkmOn23YuJ1D5M3ewvDJDlrx",
-	"ZDSKHMWV7kVS35ivk82xIYQ3MwvWKMJ27s4vz25q/kOuuHV82VIABObLFt2ysxVrEyWjawm1Vc2PSlFg",
-	"f8nDgBeydIA9cJP3mdEEKRa06ZbSMsr8bOfw8PBwsr8/2d29yXqS+7RAo0Z6jApILP09TK8zWBiERyjm",
-	"zNPUojGE6VqdAbKd2UTqAq5u9gQ/tAzxCliIunR+elFSS0W1ZBZr/jaBG0yzYH6uYZUnx18fQw5jVRw6",
-	"S7gSVw02tZ63anLymJQSmxGfmFiasuSDfFiQjk5IxUHekdYNAtnekmzSUI3T6/5PiPWwaoxf4GPlPa3a",
-	"mKtC5tiB6fk0YcdN8T/m5KXHbVdwzMlDbi1CbUYLfUjztVc8OMEN/k8JT/e4enaPmXncMUXa8L/8D1Gy",
-	"wTKTmj3fF/ilMJf6Of8m9Ss+Tn8nd7vNK25zve6GB9W7D90U/2iaNgfp78TTW3AdSe1qmPUAL1rfrrFs",
-	"WsZ5mpYmF+XSWDd/nb3O+Ppk/X8AAAD//w==",
+	"vFhdTxw3F/4rlt/3gqSzO7NJpEYj9SItbUQVVJQ0rRCgYGbOsE7G9sT2AFu0/7069nzueGGBNFew9rGf",
+	"cx6fz7mlmRKVkiCtoektrZhmAizo5tdKgLSfeI6/cjCZ5pXlStKUHvk9crBPI8pxpWJ2SSMqmQD3qzsb",
+	"UQ1fa64hp6nVNUTUZEsQDC+1qwqljdVcXtL1OqJGaTuF+0UJwWYGUEELOUEpUnAoczMnuKkkqZi1oKVJ",
+	"yfks04Byn5g9J3uVhoLfkPPZOfmJ4L3PyDkTqpa4KRUZ7TOTPTuVrVFfa9Cr3iqn3FB/uGGiKnFrAEmj",
+	"iV1rJMFUShpw1L5Tl1y+b1ZwIVPSgnSWs6oqecbQ8vizQfNvB4j/11DQlP4v7l8u9rsm/mhAe7Axexps",
+	"rSWx6gtIwmROagOacFkoLRwOXUfti77jxj5KsUqrCrTl3sCSC25HDC2SjhYuLVyiqhGt2CWMxcJSTjd3",
+	"M7cgzH1MNMbg2eY2pjVbud/KsnIE+erFFLM/qC4+Q2ZDtLYxgJQNGHwPVxyuvwGHAozZpKcD1Q6FmFoI",
+	"5lx0w+UiaiyztbsIZC1oeoLgWl2BD0m0CnJ6Fg0uHwhMI3NnPjwB5EOjWs9Ms/INqCkYLyEfMfMi7F9a",
+	"ZWAM2nC/M5o6Q+GR5I9ByakTLZLkaV40oOujZLVdKs3/gfxXrZXegalGEad87c6DtCjkaWr9JKWH3NFB",
+	"FGaAK1by3CcGGtErVtbNq+QYF8ki6p2w0aq7NSVi203Oyt1SljcvQMubHosrSfyDI1SLmmnIUYCVhvZ4",
+	"zv6Os7HTeKuGgZ8Es00w7na3PhQ7fQU88Wr0KGcTH+niZWqCL1tjzRZJMk+SUAYYlCSMGZftaUpzZmFm",
+	"uYDQGZ5v3B4SEqCzJdtU5LBZJW/uSUfdCXSIErCgR6SPVBIhqU2I75CJJpn3aw0mQN5/nBAj6urvBBYE",
+	"42Wg2YmoViUEN7wjBfujzXwSUQNZrbldfcAA8JAXwDRoDKH+12/t8//+959tD4M3+d3ewKW1lQ9IbBCc",
+	"Etw6MvZrzZk8Yiuyz8zyQjGdkzdHB5g4QBsftot5Mk/QBFWBZBWnKX05T+YvaeQaRKddnLfH46tFjGEV",
+	"l9gPOeqUfzkk0EX+QY45UhnbYf61QMNcB9X0lmDszypfPaGebH+jihlzrXQefo1hXPs7BifOgtl/3Axv",
+	"NoYvkmRbyuzk4nH3uI7oq2Rx/6lpVXHe0xUGdyu55nZJnCnkB9KZgpLjZxu2ZJcQeLO3MHyyo1Y8Gg0Z",
+	"J2Gle5HYtdzraHMg8LFMVEEaRcje/cnk2ba23ieGOweTiQLAdLZs0Q25WJE2KxK8FlFb1dwQFAR2lzwM",
+	"uOClBd0DN0meKImQrMBNu+SGYJone8fHx8ezw8PZ/v4261HuU6GVGOkxqhah9PcwvS6gUBoeoZhVT1ML",
+	"Bwwia3EBmuwtZlzmcLPdE9w4MsTLoWB1ad1cIrjkAgvHItTpbQI3mKogbmIhlSPHXR9C9gNTGDqJqGA3",
+	"DTb2mXdqcvaYlBKa/p6YWJqy5IJ8WJBOzlDFQd7hxg4C2dyRbOLu1IOSzoduSHo0MZujy3fi5i3YLou0",
+	"q3fQc9t/dlnHfkL0H3Jstpx+VPlYuUisNiZKn1n3YH45j8hp0xidUozi07YhOqUYQRtFGlEC7Dd/D3Lf",
+	"nj24Agw+JXnfflzB3+Fzwbh/DAwlf7h/WEkGy4RL8vyQ6S+5upbP6Tcp8OEvCd/J5+5yi2a0A33VPl6t",
+	"y6ZpTOO4VBkrl8rY9HXyOqHrs/W/AQAA//8=",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

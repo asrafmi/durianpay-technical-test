@@ -10,3 +10,8 @@ export enum StatusFilter {
   PROCESSING = 'processing',
   FAILED = 'failed',
 }
+
+export enum PaymentReviewStatus {
+    Approved = 'approved',
+    Rejected = 'rejected',
+}

@@ -31,7 +31,6 @@ const (
 type PaymentReviewStatus string
 
 const (
-	PaymentReviewStatusUnderReview PaymentReviewStatus = "under review"
-	PaymentReviewStatusApproved    PaymentReviewStatus = "approved"
-	PaymentReviewStatusRejected    PaymentReviewStatus = "rejected"
+	PaymentReviewStatusApproved PaymentReviewStatus = "approved"
+	PaymentReviewStatusRejected PaymentReviewStatus = "rejected"
 )

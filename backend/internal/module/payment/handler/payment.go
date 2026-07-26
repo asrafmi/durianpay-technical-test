@@ -112,7 +112,7 @@ func (p *PaymentHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r 
 	}
 }
 
-func (p *PaymentHandler) PostDashboardV1PaymentsReviewPaymentId(w http.ResponseWriter, r *http.Request, paymentId openapigen.PaymentId) {
+func (p *PaymentHandler) PatchDashboardV1PaymentsPaymentIdReview(w http.ResponseWriter, r *http.Request, paymentId openapigen.PaymentId) {
 	if paymentId == "" {
 		transport.WriteAppError(w, entity.ErrorBadRequest("payment_id is required"))
 		return

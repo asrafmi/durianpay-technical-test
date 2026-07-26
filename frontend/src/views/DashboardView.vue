@@ -12,7 +12,7 @@ import SummaryCardSkeleton from '../components/SummaryCardSkeleton.vue'
 import DateRangeFilter from '../components/DateRangeFilter.vue'
 
 import { formatCurrency, formatDate, percentageOf, STATUS_META } from '../lib/payment-format'
-import { StatusFilter } from '../constants/payment-status'
+import { PaymentReviewStatus, StatusFilter } from '../constants/payment-status'
 import { ROUTE_DASHBOARD } from '../constants/routes'
 import { usePaymentStore, type Payment } from '../stores/payment.ts'
 import { usePaymentFilters } from '../composables/usePaymentFilters'
@@ -75,8 +75,8 @@ function handleClosePanel() {
     selectedPayment.value = null
 }
 
-function onPaymentReview(paymentId: string, status: string) {
-    paymentStore.reviewPayment(paymentId, status as any)
+function onPaymentReview(paymentId: string, status: PaymentReviewStatus) {
+    paymentStore.reviewPayment(paymentId, status)
     handleClosePanel()
 }
 </script>

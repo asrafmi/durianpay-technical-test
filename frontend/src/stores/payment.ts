@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
 import omitEmpty from '../lib/omit-empty'
 import { getErrorMessage } from '../lib/error-message'
-import type { PaymentStatus } from '../constants/payment-status'
+import type { PaymentReviewStatus } from '../constants/payment-status'
 
 export interface Payment {
   id: string
@@ -86,8 +86,8 @@ export const usePaymentStore = defineStore('payment', () => {
     isLoadingPaymentSummary.value = false
   }
 
-  const reviewPayment = async (paymentId: string, status: PaymentStatus) => {
-    const [err, data] = await awaitToError(api.post(`/dashboard/v1/payments/review/${paymentId}`, { status }))
+  const reviewPayment = async (paymentId: string, status: PaymentReviewStatus) => {
+    const [err, data] = await awaitToError(api.patch(`/dashboard/v1/payments/${paymentId}/review`, { status }))
     if (err) {
       error.value = getErrorMessage(err)
       return

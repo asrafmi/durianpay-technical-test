@@ -78,8 +78,8 @@ components:
       properties:
         status:
           type: string
-          enum: ["under review", "approved", "rejected"]
-          example: "under review"
+          enum: ["approved", "rejected"]
+          example: "approved"
   responses:
     LoginResponse:
       description: return token and user information
@@ -135,8 +135,8 @@ components:
             properties:
               status:
                 type: string
-                enum: ["under review", "approved", "rejected"]
-                example: "under review"
+                enum: ["approved", "rejected"]
+                example: "approved"
               message:
                 type: string
                 example: "Payment review summary"
@@ -225,8 +225,8 @@ paths:
         "401":
           $ref: '#/components/responses/UnauthorizedError'
 
-  /dashboard/v1/payments/review/{payment_id}:
-    post:
+  /dashboard/v1/payments/{payment_id}/review:
+    patch:
       summary: Update payment review status
       description: Update payment review status (e.g., "reject" or "approve")
       parameters:

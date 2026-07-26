@@ -43,7 +43,7 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
 	}))
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
