@@ -102,6 +102,7 @@ export const usePaymentStore = defineStore('payment', () => {
         autoClose: TOAST_ERROR_DURATION,
         type: 'error',
       });
+      return
     }
 
     toast(`Payment review updated successfully to ${data.data.status}`, {
