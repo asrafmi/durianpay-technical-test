@@ -131,7 +131,7 @@ func (p *PaymentHandler) PatchDashboardV1PaymentsPaymentIdReview(w http.Response
 	}
 	status := entity.PaymentReviewStatus(*request.Status)
 
-	response, err := p.paymentUC.ReviewPayment(paymentID, status)
+	response, err := p.paymentUC.ReviewPayment(r, paymentID, status)
 	if err != nil {
 		transport.WriteError(w, err)
 		return

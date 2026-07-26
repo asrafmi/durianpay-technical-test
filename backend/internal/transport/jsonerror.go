@@ -18,6 +18,12 @@ func CodeToStatus(code entity.Code) int {
 	switch code {
 	case entity.ErrorCodeBadRequest:
 		return http.StatusBadRequest
+	case entity.ErrorCodeNotFound:
+		return http.StatusNotFound
+	case entity.ErrorCodeUnauthorized:
+		return http.StatusUnauthorized
+	case entity.ErrorCodeForbidden:
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}
