@@ -1,9 +1,12 @@
-import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { defineStore } from 'pinia'
+import { toast } from 'vue3-toastify'
 import { api } from '../lib/api'
 import awaitToError from '../lib/await-to-error'
 import omitEmpty from '../lib/omit-empty'
 import { getErrorMessage } from '../lib/error-message'
+import type { PaymentReviewStatus } from '../constants/payment-status'
+import { TOAST_ERROR_DURATION, TOAST_SUCCESS_DURATION } from '../constants/toast'
 
 export interface Payment {
   id: string
@@ -63,6 +66,9 @@ export const usePaymentStore = defineStore('payment', () => {
     if (err) {
       error.value = getErrorMessage(err)
       isLoadingPaymentList.value = false
+      toast(getErrorMessage(err), {
+        autoClose: TOAST_ERROR_DURATION,
+      });
       return
     }
 
@@ -77,12 +83,32 @@ export const usePaymentStore = defineStore('payment', () => {
     if (err) {
       error.value = getErrorMessage(err)
       isLoadingPaymentSummary.value = false
+      toast(getErrorMessage(err), {
+        autoClose: TOAST_ERROR_DURATION,
+      });
       return
     }
 
     const summaryData: PaymentSummaryResponse = data.data
     summary.value = summaryData
     isLoadingPaymentSummary.value = false
+  }
+
+  const reviewPayment = async (paymentId: string, status: PaymentReviewStatus) => {
+    const [err, data] = await awaitToError(api.patch(`/dashboard/v1/payments/${paymentId}/review`, { status }))
+    if (err) {
+      error.value = getErrorMessage(err)
+      toast(getErrorMessage(err), {
+        autoClose: TOAST_ERROR_DURATION,
+        type: 'error',
+      });
+      return
+    }
+
+    toast(`Payment review updated successfully to ${data.data.status}`, {
+      autoClose: TOAST_SUCCESS_DURATION,
+      type: 'success',
+    });
   }
 
   return {
@@ -96,6 +122,7 @@ export const usePaymentStore = defineStore('payment', () => {
       fetchPaymentSummary,
 
       error,
+      reviewPayment,
     }
   }
 )

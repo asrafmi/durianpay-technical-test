@@ -9,6 +9,7 @@ const ERROR_CODE_MESSAGES: Record<string, string> = {
   bad_request: 'Permintaan tidak valid. Periksa kembali data yang Anda masukkan.',
   unauthorized: 'Sesi Anda telah berakhir. Silakan masuk kembali.',
   not_found: 'Data yang Anda cari tidak ditemukan.',
+  forbidden: 'Anda tidak memiliki izin untuk melakukan tindakan ini.',
   internal_error: 'Terjadi kesalahan pada server. Silakan coba lagi.',
 }
 

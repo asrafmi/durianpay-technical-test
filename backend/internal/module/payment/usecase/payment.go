@@ -1,16 +1,19 @@
 package usecase
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/repository"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/pagination"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/role"
 )
 
 type PaymentUsecase interface {
 	GetListPayments(status, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
 	GetPaymentSummary() (*entity.PaymentSummary, error)
+	ReviewPayment(r *http.Request, paymentID string, status entity.PaymentReviewStatus) (entity.PaymentReviewResponse, error)
 }
 
 type Payment struct {
@@ -44,4 +47,15 @@ func (p *Payment) GetPaymentSummary() (*entity.PaymentSummary, error) {
 	}
 
 	return &summary, nil
+}
+
+func (p *Payment) ReviewPayment(r *http.Request, paymentID string, status entity.PaymentReviewStatus) (entity.PaymentReviewResponse, error) {
+	if role := role.GetRoleFromContext(r); role != "operation" {
+		return entity.PaymentReviewResponse{}, entity.WrapError(nil, entity.ErrorCodeForbidden, "forbidden")
+	}
+
+	return entity.PaymentReviewResponse{
+		Status:  string(status),
+		Message: "Payment review processed",
+	}, nil
 }

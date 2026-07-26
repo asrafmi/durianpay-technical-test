@@ -1,12 +1,24 @@
 package usecase
 
 import (
+	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/transport"
 )
+
+func requestWithRole(role string) *http.Request {
+	r := httptest.NewRequest(http.MethodPatch, "/dashboard/v1/payments/1/review", nil)
+	if role == "" {
+		return r
+	}
+	return r.WithContext(context.WithValue(r.Context(), transport.CtxKeyRole, role))
+}
 
 type fakePaymentRepo struct {
 	payments []entity.Payment
@@ -182,5 +194,59 @@ func TestPayment_GetListPayments_PropagatesListError(t *testing.T) {
 	_, _, _, _, err := uc.GetListPayments("", "", nil, nil, 1, 10, "")
 	if !errors.Is(err, wantErr) {
 		t.Errorf("err = %v, want %v", err, wantErr)
+	}
+}
+
+func TestPayment_ReviewPayment_OperationRoleCanApprove(t *testing.T) {
+	uc := NewPaymentUsecase(&fakePaymentRepo{})
+
+	got, err := uc.ReviewPayment(requestWithRole("operation"), "1", entity.PaymentReviewStatusApproved)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Status != string(entity.PaymentReviewStatusApproved) {
+		t.Errorf("status = %q, want %q", got.Status, entity.PaymentReviewStatusApproved)
+	}
+}
+
+func TestPayment_ReviewPayment_OperationRoleCanReject(t *testing.T) {
+	uc := NewPaymentUsecase(&fakePaymentRepo{})
+
+	got, err := uc.ReviewPayment(requestWithRole("operation"), "1", entity.PaymentReviewStatusRejected)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Status != string(entity.PaymentReviewStatusRejected) {
+		t.Errorf("status = %q, want %q", got.Status, entity.PaymentReviewStatusRejected)
+	}
+}
+
+func TestPayment_ReviewPayment_NonOperationRoleIsForbidden(t *testing.T) {
+	tests := []struct {
+		name string
+		role string
+	}{
+		{"cs role", "cs"},
+		{"unknown role", "manager"},
+		{"missing role", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			uc := NewPaymentUsecase(&fakePaymentRepo{})
+
+			_, err := uc.ReviewPayment(requestWithRole(tt.role), "1", entity.PaymentReviewStatusApproved)
+			if err == nil {
+				t.Fatal("expected an error, got nil")
+			}
+
+			var appErr *entity.AppError
+			if !errors.As(err, &appErr) {
+				t.Fatalf("err = %v, want an *entity.AppError", err)
+			}
+			if appErr.Code != entity.ErrorCodeForbidden {
+				t.Errorf("code = %q, want %q", appErr.Code, entity.ErrorCodeForbidden)
+			}
+		})
 	}
 }
