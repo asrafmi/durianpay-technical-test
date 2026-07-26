@@ -9,9 +9,11 @@ const props = defineProps<{
     goToPage: (page: number) => void
     goToPrevPage: () => void
     goToNextPage: () => void
+    changePageSize: (size: number) => void
 }>()
 
 const PAGE_WINDOW = 2
+const PAGE_OPTIONS = [5, 10, 25, 50, 100]
 
 const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.pageSize)))
 const pageNumbers = computed(() => {
@@ -24,7 +26,8 @@ const pageNumbers = computed(() => {
 
 </script>
 <template>
-    <div class="flex flex-col items-center gap-3 border-t border-border px-4 py-4 sm:flex-row sm:justify-between sm:px-6">
+    <div
+        class="flex flex-col items-center gap-3 border-t border-border px-4 py-4 sm:flex-row sm:justify-between sm:px-6">
         <div class="text-[13px] text-text-muted">1–{{ rows.length }} of {{ total }}</div>
         <div class="flex items-center gap-1.5 overflow-x-auto">
             <button type="button" :disabled="currentPage === 1"
@@ -61,6 +64,12 @@ const pageNumbers = computed(() => {
                 @click="goToNextPage">
                 <span class="hidden sm:inline">Next</span> <span aria-hidden="true">›</span>
             </button>
+            <select name="page-size" id="page-size" :value="pageSize"
+                @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
+                class="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-white px-3 py-1.5 font-sans text-[13px] font-semibold text-text-primary transition-colors hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border">
+                <option v-for="option in PAGE_OPTIONS" :key="option" :value="option">{{
+                    option }}</option>
+            </select>
         </div>
     </div>
 </template>

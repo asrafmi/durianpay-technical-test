@@ -11,6 +11,7 @@ import { TOAST_ERROR_DURATION, TOAST_SUCCESS_DURATION } from '../constants/toast
 export interface Payment {
   id: string
   amount: number
+  currency: string
   merchant: string
   status: string
   created_at: string
@@ -32,6 +33,7 @@ interface PaymentSummaryResponse {
 
 interface GetDashboardV1PaymentsParams {
   search?: string
+  min_amount?: number
   status?: string
   sort?: string
   date_from?: string
@@ -51,6 +53,7 @@ export const usePaymentStore = defineStore('payment', () => {
   
   const fetchPayments = async ({
     search,
+    min_amount,
     status,
     sort,
     date_from,
@@ -59,7 +62,7 @@ export const usePaymentStore = defineStore('payment', () => {
     limit = 10,
   }: GetDashboardV1PaymentsParams) => {
     isLoadingPaymentList.value = true
-    const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, status, sort, date_from, date_to, page, limit })
+    const params = omitEmpty<GetDashboardV1PaymentsParams>({ search, min_amount, status, sort, date_from, date_to, page, limit })
     const [err, data] = await awaitToError(api.get<PaymentListResponse>('/dashboard/v1/payments', {
       params,
     }))
@@ -111,6 +114,15 @@ export const usePaymentStore = defineStore('payment', () => {
     });
   }
 
+  function $reset() {
+    payments.value = []
+    total.value = 0
+    isLoadingPaymentList.value = false
+    summary.value = null
+    isLoadingPaymentSummary.value = false
+    error.value = null
+  }
+
   return {
       payments,
       total,
@@ -123,6 +135,7 @@ export const usePaymentStore = defineStore('payment', () => {
 
       error,
       reviewPayment,
+      $reset,
     }
   }
 )

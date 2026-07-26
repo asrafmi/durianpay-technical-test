@@ -6,12 +6,13 @@ import (
 
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/module/payment/repository"
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/date"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/pagination"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/pkg/role"
 )
 
 type PaymentUsecase interface {
-	GetListPayments(status, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
+	GetListPayments(status, search string, dateFrom, dateTo *time.Time, minimumAmount *int, page, limit int, sort string) (payments []entity.Payment, total, effectivePage, effectiveLimit int, err error)
 	GetPaymentSummary() (*entity.PaymentSummary, error)
 	ReviewPayment(r *http.Request, paymentID string, status entity.PaymentReviewStatus) (entity.PaymentReviewResponse, error)
 }
@@ -24,15 +25,18 @@ func NewPaymentUsecase(repo repository.PaymentRepository) *Payment {
 	return &Payment{repo: repo}
 }
 
-func (p *Payment) GetListPayments(status, search string, dateFrom, dateTo *time.Time, page, limit int, sort string) ([]entity.Payment, int, int, int, error) {
+func (p *Payment) GetListPayments(status, search string, dateFrom, dateTo *time.Time, minimumAmount *int, page, limit int, sort string) ([]entity.Payment, int, int, int, error) {
 	page, limit = pagination.Normalize(page, limit)
+	if !date.IsDateRangeValid(dateFrom, dateTo) {
+		return nil, 0, 0, 0, entity.WrapError(nil, entity.ErrorCodeBadRequest, "date_from must not be after date_to")
+	}
 
-	payments, err := p.repo.GetListPayments(entity.PaymentStatus(status), search, dateFrom, dateTo, page, limit, sort)
+	payments, err := p.repo.GetListPayments(entity.PaymentStatus(status), search, dateFrom, dateTo, minimumAmount, page, limit, sort)
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}
 
-	total, err := p.repo.CountPayments(entity.PaymentStatus(status), search, dateFrom, dateTo)
+	total, err := p.repo.CountPayments(entity.PaymentStatus(status), search, dateFrom, dateTo, minimumAmount)
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}

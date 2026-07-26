@@ -6,7 +6,7 @@ export const STATUS_META: Record<PaymentStatus, { label: string; color: string; 
   [PaymentStatus.FAILED]: { label: 'Failed', color: '#E31C4D', bg: '#FDE8ED' },
 }
 
-export function formatCurrency(n: number): string {
+export function formatAmount(n: number): string {
   return 'Rp' + n.toLocaleString('id-ID')
 }
 
