@@ -30,6 +30,11 @@ body {
   margin: 0;
 }
 
+.Toastify__toast {
+  font-family: var(--font-sans) !important;
+  border-radius: 14px !important;
+}
+
 @keyframes floatA {
   0%,
   100% {

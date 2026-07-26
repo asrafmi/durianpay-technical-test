@@ -88,11 +88,6 @@ function onPaymentReview(paymentId: string, status: PaymentReviewStatus) {
             <div class="mt-2 text-2xl font-bold tracking-tight">Payments</div>
             <div class="mt-0.5 text-sm text-text-muted">Monitor and manage incoming payments.</div>
         </div>
-
-        <div v-if="paymentStore.error" class="rounded-lg bg-error-bg px-3.5 py-2.5 text-[13px] text-error-text">
-            {{ paymentStore.error }}
-        </div>
-
         <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <template v-if="paymentStore.isLoadingPaymentSummary">
                 <SummaryCardSkeleton v-for="i in 4" :key="i" />
