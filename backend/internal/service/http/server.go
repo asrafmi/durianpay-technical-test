@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/asrafmi/durianpay-technical-test/backend/internal/config"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/entity"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/openapigen"
 	"github.com/asrafmi/durianpay-technical-test/backend/internal/transport"
@@ -34,6 +35,14 @@ const (
 	idleTimeout  = 60
 )
 
+func splitAndTrim(s string) []string {
+	parts := strings.Split(s, ",")
+	for i, p := range parts {
+		parts[i] = strings.TrimSpace(p)
+	}
+	return parts
+}
+
 func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, verifier TokenVerifier) *Server {
 	swagger, err := openapigen.GetSwagger()
 	if err != nil {
@@ -43,9 +52,9 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, ve
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-		AllowedHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowedOrigins: splitAndTrim(config.AllowedOrigins),
+		AllowedMethods: splitAndTrim(config.AllowedMethods),
+		AllowedHeaders: splitAndTrim(config.AllowedHeaders),
 	}))
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
 		http.ServeFile(w, req, openapiYamlPath)

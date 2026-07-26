@@ -5,6 +5,7 @@ import awaitToError from '../lib/await-to-error'
 import { getErrorMessage } from '../lib/error-message'
 import { AUTH_STORAGE_KEY } from '../constants/storage'
 import type { UserRole } from '../constants/user-role'
+import { usePaymentStore } from './payment'
 
 interface AuthUser {
   email: string
@@ -35,11 +36,14 @@ function loadStoredAuth(): StoredAuth | null {
 export const useAuthStore = defineStore('auth', () => {
   const stored = loadStoredAuth()
   const user = ref<AuthUser | null>(stored?.user ?? null)
+  const role = ref<UserRole | null>(stored?.user?.role ?? null)
   const token = ref<string | null>(stored?.token ?? null)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
+  const isOperation = computed(() => role.value === 'operation')
+  const isCS = computed(() => role.value === 'cs')
 
   async function login(email: string, password: string) {
     isLoading.value = true
@@ -58,8 +62,9 @@ export const useAuthStore = defineStore('auth', () => {
       })
       throw err
     }
-    
+
     user.value = { email: data.data.email, role: data.data.role }
+    role.value = data.data.role
     token.value = data.data.token
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: user.value, token: data.data.token }))
     isLoading.value = false
@@ -67,9 +72,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     user.value = null
+    role.value = null
     token.value = null
     localStorage.removeItem(AUTH_STORAGE_KEY)
+    usePaymentStore().$reset()
   }
 
-  return { user, token, isAuthenticated, isLoading, error, login, logout }
+  return { user, role, isOperation, isCS, token, isAuthenticated, isLoading, error, login, logout }
 })

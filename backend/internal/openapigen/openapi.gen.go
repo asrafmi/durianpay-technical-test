@@ -90,6 +90,9 @@ type Payment struct {
 	Amount    *string    `json:"amount,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 
+	// Currency Example: USD
+	Currency *string `json:"currency,omitempty"`
+
 	// Id Example: 1
 	Id *string `json:"id,omitempty"`
 
@@ -190,6 +193,9 @@ type GetDashboardV1PaymentsParams struct {
 
 	// DateTo filter payments created on or before this date (YYYY-MM-DD)
 	DateTo *openapi_types.Date `form:"date_to,omitempty" json:"date_to,omitempty"`
+
+	// MinAmount minimum amount filter
+	MinAmount *int `form:"min_amount,omitempty" json:"min_amount,omitempty"`
 
 	// Page page number (1-indexed)
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
@@ -344,6 +350,19 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "date_to"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_to", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "min_amount" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "min_amount", r.URL.Query(), &params.MinAmount, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "min_amount"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "min_amount", Err: err})
 		}
 		return
 	}

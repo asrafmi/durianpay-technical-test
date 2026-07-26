@@ -21,6 +21,11 @@ func NewPaymentHandler(paymentUC paymentUsecase.PaymentUsecase) *PaymentHandler 
 	}
 }
 
+func getRoleFromContext(r *http.Request) string {
+	role, _ := r.Context().Value(transport.CtxKeyRole).(string)
+	return role
+}
+
 func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 	status := string(p.Status)
 	createdAt, err := time.Parse(time.RFC3339, p.CreatedAt)
@@ -28,10 +33,13 @@ func toOpenapiPayment(p entity.Payment) (openapigen.Payment, error) {
 		return openapigen.Payment{}, entity.WrapError(err, entity.ErrorCodeInternal, "invalid created_at format")
 	}
 
+	currency := "IDR"
+
 	return openapigen.Payment{
 		Id:        &p.ID,
 		Merchant:  &p.Merchant,
 		Status:    &status,
+		Currency:  &currency,
 		Amount:    &p.Amount,
 		CreatedAt: &createdAt,
 	}, nil
@@ -57,6 +65,11 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		dateTo = &params.DateTo.Time
 	}
 
+	var minimumAmount *int
+	if params.MinAmount != nil {
+		minimumAmount = params.MinAmount
+	}
+
 	var page, limit int
 	if params.Page != nil {
 		page = *params.Page
@@ -65,7 +78,7 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		limit = *params.Limit
 	}
 
-	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, search, dateFrom, dateTo, page, limit, sort)
+	payments, total, page, limit, err := p.paymentUC.GetListPayments(status, search, dateFrom, dateTo, minimumAmount, page, limit, sort)
 	if err != nil {
 		transport.WriteError(w, err)
 		return
@@ -94,6 +107,11 @@ func (p *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 }
 
 func (p *PaymentHandler) GetDashboardV1PaymentsSummary(w http.ResponseWriter, r *http.Request) {
+	if getRoleFromContext(r) != "operation" {
+		transport.WriteAppError(w, entity.ErrorForbidden("forbidden"))
+		return
+	}
+
 	summary, err := p.paymentUC.GetPaymentSummary()
 	if err != nil {
 		transport.WriteError(w, err)

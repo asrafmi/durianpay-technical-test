@@ -2,6 +2,7 @@
 import { CheckCircle2Icon, X } from '@lucide/vue'
 import Button from './Button.vue'
 import { PaymentReviewStatus } from '../constants/payment-status.ts'
+import { useAuthStore } from '../stores/auth.ts'
 
 interface Payment {
     id: string
@@ -24,6 +25,8 @@ defineEmits<{
 // Dates are displayed in Asia/Jakarta (WIB) to match how the backend
 // interprets date_from/date_to filters.
 const BUSINESS_TIMEZONE = 'Asia/Jakarta'
+
+const authStore = useAuthStore()
 
 function formatDate(date: string): string {
     return new Date(date).toLocaleDateString('id-ID', {
@@ -97,7 +100,7 @@ function formatTime(date: string): string {
                 </div>
             </div>
 
-            <div class="flex flex-col gap-5 border-t border-[#E5E5EA] px-6 py-4">
+            <div v-if="authStore.isOperation" class="flex flex-col gap-5 border-t border-[#E5E5EA] px-6 py-4">
                 <Button type="button" variant="success" class="w-full"
                     @click="$emit('review', payment.id, PaymentReviewStatus.Approved)">
                     <div class="flex items-center justify-center">
