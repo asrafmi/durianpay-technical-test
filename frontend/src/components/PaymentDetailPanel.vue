@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { X } from '@lucide/vue'
+import { CheckCircle2Icon, X } from '@lucide/vue'
 import Button from './Button.vue'
 import { PaymentReviewStatus } from '../constants/payment-status.ts'
 
@@ -98,11 +98,20 @@ function formatTime(date: string): string {
             </div>
 
             <div class="flex flex-col gap-5 border-t border-[#E5E5EA] px-6 py-4">
-                <Button type="button" variant="primary" class="w-full" @click="$emit('close')">Close</Button>
-                <Button type="button" variant="secondary" class="w-full"
-                    @click="$emit('review', payment.id, PaymentReviewStatus.Approved)">Approve</Button>
-                <Button type="button" variant="secondary" class="w-full"
-                    @click="$emit('review', payment.id, PaymentReviewStatus.Rejected)">Reject</Button>
+                <Button type="button" variant="success" class="w-full"
+                    @click="$emit('review', payment.id, PaymentReviewStatus.Approved)">
+                    <div class="flex items-center justify-center">
+                        <CheckCircle2Icon :size="20" class="mr-2" />
+                        Approve
+                    </div>
+                </Button>
+                <Button type="button" variant="primary" class="w-full"
+                    @click="$emit('review', payment.id, PaymentReviewStatus.Rejected)">
+                    <div class="flex items-center justify-center">
+                        <X :size="20" class="mr-2" />
+                        Reject
+                    </div>
+                </Button>
             </div>
         </div>
     </div>
