@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { AxiosError, AxiosHeaders } from 'axios'
 import { usePaymentStore } from './payment'
 import { api } from '../lib/api'
+import { PaymentReviewStatus } from '../constants/payment-status'
 
 function makeApiError(code: string) {
   return new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
@@ -15,15 +16,17 @@ function makeApiError(code: string) {
 }
 
 vi.mock('../lib/api', () => ({
-  api: { get: vi.fn() },
+  api: { get: vi.fn(), patch: vi.fn() },
 }))
 
 const mockedGet = api.get as unknown as ReturnType<typeof vi.fn>
+const mockedPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
 describe('usePaymentStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     mockedGet.mockReset()
+    mockedPatch.mockReset()
   })
 
   describe('fetchPayments', () => {
@@ -117,6 +120,35 @@ describe('usePaymentStore', () => {
       expect(store.error).toBe('Terjadi kesalahan pada server. Silakan coba lagi.')
       expect(store.isLoadingPaymentSummary).toBe(false)
       expect(store.summary).toBeNull()
+    })
+  })
+
+  describe('reviewPayment', () => {
+    it('sends a PATCH request with the payment id and status', async () => {
+      mockedPatch.mockResolvedValueOnce({ data: { status: 'approved', message: 'Payment review processed' } })
+
+      const store = usePaymentStore()
+      await store.reviewPayment('10', PaymentReviewStatus.Approved)
+
+      expect(mockedPatch).toHaveBeenCalledWith('/dashboard/v1/payments/10/review', { status: 'approved' })
+    })
+
+    it('clears any previous error on success', async () => {
+      mockedPatch.mockResolvedValueOnce({ data: { status: 'rejected', message: 'Payment review processed' } })
+
+      const store = usePaymentStore()
+      await store.reviewPayment('10', PaymentReviewStatus.Rejected)
+
+      expect(store.error).toBeNull()
+    })
+
+    it('sets a human-readable error message when the request fails', async () => {
+      mockedPatch.mockRejectedValueOnce(makeApiError('forbidden'))
+
+      const store = usePaymentStore()
+      await store.reviewPayment('10', PaymentReviewStatus.Approved)
+
+      expect(store.error).toBe('Anda tidak memiliki izin untuk melakukan tindakan ini.')
     })
   })
 })
